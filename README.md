@@ -26,9 +26,10 @@ Current build: v0.2.0-dev.
 
 ## Coming later
 
-- Notifications, including project review updates.
-- Following projects.
 - Creating projects, uploading versions and editing descriptions.
+- Viewing other profiles
+- Logging in from Modrinth ([Modrinth API docs](https://docs.modrinth.com/))
+- More to come i just don't know what..
 
 ## Screenshots
 
@@ -37,7 +38,7 @@ Current build: v0.2.0-dev.
 ![Filters](docs/screenshots/filters.png)
 ![Profile](docs/screenshots/profile.png)
 
-## Running it
+## Running it (for devs)
 
 pnpm install
 pnpm dev
