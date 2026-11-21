@@ -15,6 +15,7 @@ import {
 } from '../api/client'
 import { renderMarkdown } from '../utils/markdown'
 import { tagIconSvg } from '../data/tag-icons'
+import { linkIcon } from '../utils/link-icons'
 
 const route = useRoute()
 const router = useRouter()
@@ -227,8 +228,9 @@ onMounted(load)
         <p v-if="links.length === 0" class="project-page__message">No links listed.</p>
         <Card v-for="link in links" :key="link.label + link.url" class="link-card">
           <a :href="link.url" target="_blank" rel="noopener">
-            <span>{{ link.label }}</span>
-            <ExternalLink :size="16" :stroke-width="2" />
+            <span class="link-card__icon" aria-hidden="true" v-html="linkIcon(link.label)"></span>
+            <span class="link-card__label">{{ link.label }}</span>
+            <ExternalLink :size="16" :stroke-width="2" class="link-card__external" />
           </a>
         </Card>
       </div>
