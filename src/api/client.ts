@@ -28,6 +28,8 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     throw new Error(`Modrinth API returned ${response.status} for ${path}`)
   }
 
+  if (response.status === 204) return undefined as T
+
   return response.json() as Promise<T>
 }
 
@@ -60,6 +62,18 @@ export function getUserProjects(userId: string): Promise<Project[]> {
   return apiFetch<Project[]>(`/user/${userId}/projects`)
 }
 
+export function getFollowedProjects(userId: string): Promise<Project[]> {
+  return apiFetch<Project[]>(`/user/${userId}/follows`)
+}
+
+export function followProject(id: string): Promise<void> {
+  return apiFetch<void>(`/project/${id}/follow`, { method: 'POST' })
+}
+
+export function unfollowProject(id: string): Promise<void> {
+  return apiFetch<void>(`/project/${id}/follow`, { method: 'DELETE' })
+}
+
 export interface GalleryImage {
   url: string
   title: string | null
@@ -86,6 +100,7 @@ export interface ProjectDetail extends Project {
   published: string
   updated: string
   color: number | null
+  license?: { id: string; name: string; url: string }
 }
 
 export function getProject(slugOrId: string): Promise<ProjectDetail> {
@@ -124,6 +139,31 @@ export function getProjectVersions(
   limit = 5,
 ): Promise<ProjectVersion[]> {
   return apiFetch<ProjectVersion[]>(`/project/${slugOrId}/version?limit=${limit}`)
+}
+
+export interface Notification {
+  id: string
+  user_id: string
+  type: 'project_update' | 'team_invite' | 'status_change' | 'moderator_message' | null
+  title: string
+  text: string
+  link: string
+  read: boolean
+  created: string
+}
+
+export function getUserNotifications(userId: string): Promise<Notification[]> {
+  return apiFetch<Notification[]>(`/user/${userId}/notifications`)
+}
+
+export function markNotificationRead(id: string): Promise<void> {
+  return apiFetch<void>(`/notification/${id}`, { method: 'PATCH' })
+}
+
+export function markNotificationsRead(ids: string[]): Promise<void> {
+  const search = new URLSearchParams()
+  search.set('ids', JSON.stringify(ids))
+  return apiFetch<void>(`/notifications?${search.toString()}`, { method: 'PATCH' })
 }
 
 export interface SearchHit {

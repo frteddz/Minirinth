@@ -66,3 +66,4 @@ Credits:
 - Inter, SIL Open Font License, see `src/assets/fonts/OFL.txt`.
 - Simple Icons, CC0 1.0, for a few filler icons.
 - Modrinth API tag icons for loaders and categories.
+- Notification sounds from Freesound by Kagateni, heyheytheree, zenosounds, SelectDetail57, yfjesse and Graham Makes, listed in `assets/notification-sfx/CREDITS.md`.
