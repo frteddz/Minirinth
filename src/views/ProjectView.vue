@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeft, ExternalLink } from '@lucide/vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Card from '../ui/components/Card.vue'
 import downloadIcon from '../assets/icons/download.svg?raw'
@@ -35,7 +35,22 @@ const tabs = [
 
 const bodyHtml = computed(() => (project.value ? renderMarkdown(project.value.body) : ''))
 
-onMounted(load)
+const activeIndex = computed(() => tabs.findIndex((item) => item.id === tab.value))
+const tabButtons = ref<HTMLElement[]>([])
+const indicatorStyle = ref({ left: '0px', width: '0px' })
+
+async function measureIndicator() {
+  await nextTick()
+  const button = tabButtons.value[activeIndex.value]
+  if (!button) {
+    if (project.value) setTimeout(measureIndicator, 30)
+    return
+  }
+  indicatorStyle.value = { left: `${button.offsetLeft}px`, width: `${button.offsetWidth}px` }
+}
+
+watch([activeIndex, project], measureIndicator)
+onMounted(measureIndicator)
 
 const links = computed(() => {
   const source = project.value
@@ -79,6 +94,8 @@ async function load() {
   tab.value = 'about'
   try {
     project.value = await getProject(slug)
+    await nextTick()
+    measureIndicator()
     const [members, versionList] = await Promise.all([
       getProjectMembers(slug).catch(() => []),
       getProjectVersions(slug).catch(() => []),
@@ -136,11 +153,19 @@ onMounted(load)
         <span>Updated {{ formatDate(project.updated) }}</span>
       </div>
 
-      <div class="project-page__tabs" role="group" aria-label="Project sections">
+      <div class="project-page__tabs" role="tablist" aria-label="Project sections">
+        <span
+          class="project-page__tab-indicator"
+          aria-hidden="true"
+          :style="indicatorStyle"
+        ></span>
         <button
-          v-for="item in tabs"
+          v-for="(item, i) in tabs"
           :key="item.id"
+          :ref="(el) => { if (el) tabButtons[i] = el as HTMLElement }"
           type="button"
+          role="tab"
+          :aria-selected="tab === item.id"
           class="project-page__tab"
           :class="{ 'is-active': tab === item.id }"
           @click="tab = item.id"
