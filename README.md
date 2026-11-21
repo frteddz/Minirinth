@@ -4,20 +4,31 @@ Unofficial mobile port for Modrinth. Browse mods, resource packs, shaders, data 
 
 Vue 3, TypeScript and Vite, wrapped for Android with Capacitor. Powered by the [Modrinth API](https://modrinth.com), not affiliated with Modrinth.
 
+Current build: v0.2.0-dev.
+
 ## Contents
 
 - [What works now](#what-works-now)
+- [Coming later](#coming-later)
 - [Screenshots](#screenshots)
 - [Running it](#running-it)
+- [Releases](#releases)
 - [Licensing](#licensing)
 
 ## What works now
 
-- Browse each project type with real API results, including search, filters, sorting and pagination.
-- Sign in with a Modrinth personal access token and see your profile and published projects.
+- Browse mods, shaders, resource packs, data packs, modpacks and plugins with real API results.
+- Search by title, author, description or slug, then narrow things down with filters, sorting and pagination.
+- Open a project to see its description, tags, versions, gallery and external links.
+- Project pages use type based links like `/mod/fabric-api` and `/shader/sodium`.
+- Sign in with a Modrinth personal access token to see your profile, published projects, download counts and bio.
 - A floating dock that hides when you scroll down and returns when you scroll up.
 
-Project pages and editing your own projects are still to come.
+## Coming later
+
+- Notifications, including project review updates.
+- Following projects.
+- Creating projects, uploading versions and editing descriptions.
 
 ## Screenshots
 
@@ -40,6 +51,10 @@ Sync the web build into the Android project:
 pnpm cap:sync
 
 The Android project lives in `android/`. A debug build needs JDK 21 and Android SDK Platform 36 with Build Tools 35. Set `sdk.dir` in `android/local.properties` if Android Studio is not managing it for you.
+
+## Releases
+
+Prebuilt Android APKs are on the [releases page](https://github.com/frteddz/Minirinth/releases).
 
 ## Licensing
 
