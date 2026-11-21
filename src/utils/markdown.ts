@@ -2,7 +2,7 @@ import DOMPurify from 'dompurify'
 import MarkdownIt from 'markdown-it'
 
 const markdown = new MarkdownIt({
-  html: false,
+  html: true,
   linkify: true,
   breaks: true,
 })
@@ -18,5 +18,8 @@ markdown.renderer.rules.link_open = (tokens, index, options, env, self) => {
 }
 
 export function renderMarkdown(source: string): string {
-  return DOMPurify.sanitize(markdown.render(source))
+  return DOMPurify.sanitize(markdown.render(source), {
+    ADD_ATTR: ['align', 'style', 'target', 'rel'],
+    ADD_TAGS: ['details', 'summary'],
+  })
 }
