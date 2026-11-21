@@ -7,6 +7,7 @@ Vue 3, TypeScript and Vite, wrapped for Android with Capacitor. Powered by the [
 ## Contents
 
 - [What works now](#what-works-now)
+- [Screenshots](#screenshots)
 - [Running it](#running-it)
 - [Licensing](#licensing)
 
@@ -17,6 +18,13 @@ Vue 3, TypeScript and Vite, wrapped for Android with Capacitor. Powered by the [
 - A floating dock that hides when you scroll down and returns when you scroll up.
 
 Project pages and editing your own projects are still to come.
+
+## Screenshots
+
+![Home](docs/screenshots/home.png)
+![Browse](docs/screenshots/browse.png)
+![Filters](docs/screenshots/filters.png)
+![Profile](docs/screenshots/profile.png)
 
 ## Running it
 
