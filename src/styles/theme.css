@@ -938,6 +938,10 @@ body {
   height: 100%;
 }
 
+.link-card__icon svg.lucide {
+  color: var(--color-text-tertiary);
+}
+
 .link-card__label {
   flex: 1;
 }
