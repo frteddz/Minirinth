@@ -1,6 +1,6 @@
 {
-  "name": "minirinth",
-  "version": "0.2.0",
+  "name": "minirynth",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "scripts": {

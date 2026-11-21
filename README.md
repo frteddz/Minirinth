@@ -1,10 +1,12 @@
-# Minirinth
+# Minirynth
+
+Formerly Minirinth.
 
 Unofficial mobile port for Modrinth. Browse mods, resource packs, shaders, data packs, modpacks and plugins on your phone. It reads from the public Modrinth API and never installs or launches Minecraft.
 
 Vue 3, TypeScript and Vite, wrapped for Android with Capacitor. Powered by the [Modrinth API](https://modrinth.com), not affiliated with Modrinth.
 
-Current build: v0.2.0-dev.
+Current build: v0.2.1-dev.
 
 ## Contents
 
@@ -55,11 +57,11 @@ The Android project lives in `android/`. A debug build needs JDK 21 and Android 
 
 ## Releases
 
-Prebuilt Android APKs are on the [releases page](https://github.com/frteddz/Minirinth/releases).
+Prebuilt Android APKs are on the [releases page](https://github.com/frteddz/Minirynth/releases).
 
 ## Licensing
 
-GPLv3, see [LICENSE](LICENSE). Base styles and components copied from the Modrinth monorepo live in `src/ui/` and stay GPLv3. See `src/ui/COPYING.md` for what was copied and what was left out. No Modrinth logo or wordmark is used. The logo and green accent come from the Minirinth pack in `assets/minirinth-logos/`.
+GPLv3, see [LICENSE](LICENSE). Base styles and components copied from the Modrinth monorepo live in `src/ui/` and stay GPLv3. See `src/ui/COPYING.md` for what was copied and what was left out. No Modrinth logo or wordmark is used. The logo and green accent come from the Minirynth pack in `assets/minirynth-logos/`.
 
 Credits:
 

@@ -1,5 +1,5 @@
 const API_BASE_URL = 'https://api.modrinth.com/v2'
-const USER_AGENT = 'Minirinth/0.2.0 (Unofficial mobile port for Modrinth)'
+const USER_AGENT = 'Minirynth/0.2.1 (Unofficial mobile port for Modrinth)'
 
 let authToken: string | null = null
 

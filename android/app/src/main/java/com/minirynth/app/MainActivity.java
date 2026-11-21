@@ -1,4 +1,4 @@
-package com.minirinth.app;
+package com.minirynth.app;
 
 import android.os.Bundle;
 import android.webkit.WebSettings;
@@ -12,7 +12,7 @@ public class MainActivity extends BridgeActivity {
 
         WebSettings settings = getBridge().getWebView().getSettings();
         settings.setUserAgentString(
-            settings.getUserAgentString() + " Minirinth/0.2.0 (Unofficial mobile port for Modrinth)"
+            settings.getUserAgentString() + " Minirynth/0.2.1 (Unofficial mobile port for Modrinth)"
         );
     }
 }

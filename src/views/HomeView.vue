@@ -2,7 +2,7 @@
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from '../ui/components/buttons/Button.vue'
-import logo from '../assets/logo/minirinth-lockup.svg'
+import logo from '../assets/logo/minirynth-lockup.svg'
 
 const router = useRouter()
 
@@ -54,7 +54,7 @@ function discover() {
 
 <template>
   <section class="page home">
-    <img class="home-lockup" :src="logo" alt="Minirinth" />
+    <img class="home-lockup" :src="logo" alt="Minirynth" />
     <p class="page__lead">Your favourite Minecraft content, wherever you go.</p>
     <p class="home-subtitle">Browse mods, shaders, resource packs and more.</p>
 

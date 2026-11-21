@@ -2,7 +2,7 @@ import { Preferences } from '@capacitor/preferences'
 import { ref } from 'vue'
 import { getCurrentUser, setAuthToken, type ModrinthUser } from '../api/client'
 
-const TOKEN_KEY = 'minirinth.pat'
+const TOKEN_KEY = 'minirynth.pat'
 
 const user = ref<ModrinthUser | null>(null)
 const loading = ref(false)

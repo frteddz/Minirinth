@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Minirinth</string>
-    <string name="title_activity_main">Minirinth</string>
-    <string name="package_name">com.minirinth.app</string>
-    <string name="custom_url_scheme">com.minirinth.app</string>
+    <string name="app_name">Minirynth</string>
+    <string name="title_activity_main">Minirynth</string>
+    <string name="package_name">com.minirynth.app</string>
+    <string name="custom_url_scheme">com.minirynth.app</string>
 </resources>

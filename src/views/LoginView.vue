@@ -26,7 +26,7 @@ async function submit() {
       </template>
 
       <p class="login__intro">
-        Minirinth uses a Modrinth personal access token to read your account. It never asks for your password.
+        Minirynth uses a Modrinth personal access token to read your account. It never asks for your password.
       </p>
 
       <div class="login__section">

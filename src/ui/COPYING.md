@@ -2,7 +2,7 @@
 
 The source code of Modrinth's UI library is licensed under the GNU General Public License, Version 3 only, which is provided in the file [LICENSE](../../LICENSE). However, some files listed below are licensed under a different license.
 
-## Copied into Minirinth
+## Copied into Minirynth
 
 `styles/` and `styles/omorphia.scss` come from `@modrinth/assets`. `components/` and `tailwind-preset.ts` come from `@modrinth/ui` and `@modrinth/tooling-config`. Card.vue uses a Lucide icon in place of `@modrinth/assets`, and the button types are trimmed to the parts used here. The remote Inter font import was dropped in favour of the local font in `src/assets/fonts/`. No branding files were copied.
 

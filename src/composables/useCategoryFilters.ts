@@ -1,6 +1,6 @@
 import { reactive, ref, watch } from 'vue'
 
-const STORAGE_KEY = 'minirinth.advanced-exclusions'
+const STORAGE_KEY = 'minirynth.advanced-exclusions'
 
 export type SelectionGroup =
   | 'categories'
