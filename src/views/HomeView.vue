@@ -55,8 +55,8 @@ function discover() {
 <template>
   <section class="page home">
     <img class="home-lockup" :src="logo" alt="Minirinth" />
-    <p class="page__lead">Unofficial mobile port for Modrinth.</p>
-    <p class="home-subtitle">Find mods, shaders, packs and more.</p>
+    <p class="page__lead">Your favourite Minecraft content, wherever you go.</p>
+    <p class="home-subtitle">Browse mods, shaders, resource packs and more.</p>
 
     <div class="page__actions">
       <Button type="colored" color="green" @click="discover">

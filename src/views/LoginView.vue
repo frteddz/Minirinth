@@ -56,7 +56,10 @@ async function submit() {
       </div>
 
       <div class="login__form">
-        <p class="login__label">Create a token with the Read user data scope, then paste it here.</p>
+        <p class="login__label">
+          Create a token with the Read user data scope. Add Read notifications to see them in the
+          app, and Write notifications to mark them as read, then paste it here.
+        </p>
         <input
           v-model="token"
           type="password"
