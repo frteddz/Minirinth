@@ -5,6 +5,7 @@ import Card from '../ui/components/Card.vue'
 import Button from '../ui/components/buttons/Button.vue'
 import { useAuth } from '../composables/useAuth'
 import { getUserProjects, type Project } from '../api/client'
+import { projectPath } from '../utils/project-path'
 import { tagIconSvg } from '../data/tag-icons'
 import downloadIcon from '../assets/icons/download.svg?raw'
 import heartIcon from '../assets/icons/heart.svg?raw'
@@ -144,7 +145,11 @@ onMounted(restore)
       <Card
         v-for="project in filteredProjects"
         :key="project.id"
-        class="project-card profile-project"
+        class="project-card profile-project project-card--link"
+        role="link"
+        tabindex="0"
+        @click="router.push(projectPath(project.project_type, project.slug))"
+        @keyup.enter="router.push(projectPath(project.project_type, project.slug))"
       >
         <div class="project-card__row">
           <img

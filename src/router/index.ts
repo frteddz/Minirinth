@@ -4,6 +4,7 @@ import CategoryView from '../views/CategoryView.vue'
 import SearchView from '../views/SearchView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import LoginView from '../views/LoginView.vue'
+import ProjectView from '../views/ProjectView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,6 +13,32 @@ const router = createRouter({
     { path: '/search', name: 'search', component: SearchView },
     { path: '/profile', name: 'profile', component: ProfileView },
     { path: '/login', name: 'login', component: LoginView },
+    { path: '/mod/:slug', name: 'project-mod', component: ProjectView, meta: { project: true } },
+    { path: '/shader/:slug', name: 'project-shader', component: ProjectView, meta: { project: true } },
+    {
+      path: '/resource-pack/:slug',
+      name: 'project-resource-pack',
+      component: ProjectView,
+      meta: { project: true },
+    },
+    {
+      path: '/data-pack/:slug',
+      name: 'project-data-pack',
+      component: ProjectView,
+      meta: { project: true },
+    },
+    {
+      path: '/modpack/:slug',
+      name: 'project-modpack',
+      component: ProjectView,
+      meta: { project: true },
+    },
+    {
+      path: '/plugin/:slug',
+      name: 'project-plugin',
+      component: ProjectView,
+      meta: { project: true },
+    },
     { path: '/mods', name: 'mods', component: CategoryView, meta: { category: true } },
     { path: '/shaders', name: 'shaders', component: CategoryView, meta: { category: true } },
     {

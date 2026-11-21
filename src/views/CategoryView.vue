@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { ChevronLeft, ChevronRight, Search, SlidersHorizontal } from '@lucide/vue'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Card from '../ui/components/Card.vue'
 import SelectMenu from '../components/SelectMenu.vue'
 import { categories } from '../data/categories'
 import { tagIconSvg, tagSlug } from '../data/tag-icons'
 import { useCategoryFilters } from '../composables/useCategoryFilters'
+import { projectPath } from '../utils/project-path'
 import { searchProjects, type SearchHit } from '../api/client'
 import downloadIcon from '../assets/icons/download.svg?raw'
 import heartIcon from '../assets/icons/heart.svg?raw'
 
 const route = useRoute()
+const router = useRouter()
 const category = computed(() => categories.find((item) => item.path === route.path))
 const { state, openFilter, clearAll } = useCategoryFilters()
 
@@ -227,7 +229,15 @@ onUnmounted(() => {
     <p v-else-if="error" class="category__message">{{ error }}</p>
     <p v-else-if="projects.length === 0" class="category__empty">No projects match these filters.</p>
 
-    <Card v-for="project in projects" :key="project.project_id" class="project-card">
+    <Card
+      v-for="project in projects"
+      :key="project.project_id"
+      class="project-card project-card--link"
+      role="link"
+      tabindex="0"
+      @click="router.push(projectPath(project.project_type, project.slug))"
+      @keyup.enter="router.push(projectPath(project.project_type, project.slug))"
+    >
       <div class="project-card__row">
         <img
           v-if="project.icon_url"
