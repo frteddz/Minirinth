@@ -201,7 +201,7 @@ onMounted(restore)
     </template>
 
     <p class="page__footer">
-      <span class="app-version">Minirinth v0.1.2-dev</span>
+      <span class="app-version">Minirinth v0.2.0-dev</span>
       Powered by the <a href="https://modrinth.com" target="_blank" rel="noopener">Modrinth API</a>.
     </p>
   </section>
