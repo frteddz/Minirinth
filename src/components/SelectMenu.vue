@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { Check } from '@lucide/vue'
-import { onUnmounted, ref } from 'vue'
+import { Check, Search } from '@lucide/vue'
+import { computed, nextTick, onUnmounted, ref } from 'vue'
 import ChevronIcon from './ChevronIcon.vue'
 
 const props = defineProps<{
   modelValue: string | number
   options: (string | number)[]
   prefix: string
+  searchable?: boolean
+  showAllToggle?: boolean
+  toggleLabel?: string
 }>()
 
 const emit = defineEmits<{ 'update:modelValue': [value: string | number] }>()
@@ -15,6 +18,22 @@ const open = ref(false)
 const button = ref<HTMLElement | null>(null)
 const popover = ref<HTMLElement | null>(null)
 const position = ref({ top: 0, left: 0, width: 0 })
+const query = ref('')
+const searchInput = ref<HTMLInputElement | null>(null)
+const showAll = ref(false)
+
+const filteredOptions = computed(() => {
+  let result = props.options
+  if (props.showAllToggle && !showAll.value) {
+    result = result.filter((option) => {
+      const value = String(option)
+      return !value.includes('-') && !/^\d+w\d/.test(value)
+    })
+  }
+  const term = query.value.trim().toLowerCase()
+  if (!term) return result
+  return result.filter((option) => String(option).toLowerCase().includes(term))
+})
 
 function onOutside(event: PointerEvent) {
   const target = event.target as Node
@@ -35,8 +54,12 @@ function toggle() {
   const rect = button.value?.getBoundingClientRect()
   if (!rect) return
   position.value = { top: rect.bottom + 4, left: rect.left, width: rect.width }
+  query.value = ''
   open.value = true
   window.addEventListener('pointerdown', onOutside, true)
+  if (props.searchable) {
+    nextTick(() => searchInput.value?.focus())
+  }
 }
 
 function choose(option: string | number) {
@@ -56,7 +79,10 @@ onUnmounted(close)
       :aria-expanded="open"
       @click="toggle"
     >
-      <span>{{ props.prefix }}: {{ props.modelValue }}</span>
+      <span class="select-menu__button-text">
+        <span class="select-menu__label">{{ props.prefix }}</span>
+        <span class="select-menu__value">{{ props.modelValue }}</span>
+      </span>
       <ChevronIcon :open="open" />
     </button>
 
@@ -67,8 +93,30 @@ onUnmounted(close)
         class="select-menu__popover"
         :style="{ top: `${position.top}px`, left: `${position.left}px`, width: `${position.width}px` }"
       >
+        <label v-if="searchable" class="select-menu__search">
+          <Search :size="16" :stroke-width="2" aria-hidden="true" />
+          <input
+            ref="searchInput"
+            v-model="query"
+            type="search"
+            placeholder="Search..."
+            aria-label="Search options"
+          />
+        </label>
         <button
-          v-for="option in props.options"
+          v-if="showAllToggle"
+          type="button"
+          class="select-menu__toggle"
+          :class="{ 'is-active': showAll }"
+          :aria-pressed="showAll"
+          @click="showAll = !showAll"
+        >
+          <Check v-if="showAll" :size="14" :stroke-width="2.5" />
+          {{ props.toggleLabel ?? 'Show all' }}
+        </button>
+        <p v-if="filteredOptions.length === 0" class="select-menu__empty">No matches</p>
+        <button
+          v-for="option in filteredOptions"
           :key="option"
           type="button"
           class="select-menu__option"

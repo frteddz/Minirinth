@@ -1,37 +1,57 @@
 <script setup lang="ts">
-import { ArrowLeft, ExternalLink } from '@lucide/vue'
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { ArrowLeft, ExternalLink, Heart, X } from '@lucide/vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Card from '../ui/components/Card.vue'
+import SelectMenu from '../components/SelectMenu.vue'
 import downloadIcon from '../assets/icons/download.svg?raw'
 import heartIcon from '../assets/icons/heart.svg?raw'
 import {
   getProject,
-  getProjectMembers,
   getProjectVersions,
   type ProjectDetail,
-  type ProjectMember,
   type ProjectVersion,
 } from '../api/client'
 import { renderMarkdown } from '../utils/markdown'
 import { tagIconSvg } from '../data/tag-icons'
 import { linkIcon } from '../utils/link-icons'
+import { useAuth } from '../composables/useAuth'
+import { useFollows } from '../composables/useFollows'
 
 const route = useRoute()
 const router = useRouter()
+const { user } = useAuth()
+const { writeError: followWriteError, load: loadFollows, isFollowing, toggle: toggleFollow } = useFollows()
 
 const project = ref<ProjectDetail | null>(null)
-const owner = ref<ProjectMember | null>(null)
 const versions = ref<ProjectVersion[]>([])
 const tab = ref('about')
 const loading = ref(false)
 const error = ref('')
+const downloadOpen = ref(false)
+const selectedGameVersion = ref('')
+const selectedLoader = ref('')
+const copiedId = ref(false)
+const expandedChangelogs = ref<Record<string, boolean>>({})
+
+watch(downloadOpen, (open) => {
+  if (open) {
+    document.body.style.overflow = 'hidden'
+  } else if (!document.querySelector('.overlay')) {
+    document.body.style.overflow = ''
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', measureIndicator)
+  if (downloadOpen.value) document.body.style.overflow = ''
+})
 
 const tabs = [
   { id: 'about', label: 'About' },
   { id: 'versions', label: 'Versions' },
   { id: 'gallery', label: 'Gallery' },
-  { id: 'links', label: 'Links' },
+  { id: 'links', label: 'More' },
 ]
 
 const bodyHtml = computed(() => (project.value ? renderMarkdown(project.value.body) : ''))
@@ -51,7 +71,10 @@ async function measureIndicator() {
 }
 
 watch([activeIndex, project], measureIndicator)
-onMounted(measureIndicator)
+onMounted(() => {
+  measureIndicator()
+  window.addEventListener('resize', measureIndicator)
+})
 
 const links = computed(() => {
   const source = project.value
@@ -66,6 +89,94 @@ const links = computed(() => {
   return items.filter((item): item is { label: string; url: string } => Boolean(item.url))
 })
 
+function compareVersions(a: string, b: string) {
+  const snapshotA = a.match(/^(\d+)w(\d+)([a-z])$/)
+  const snapshotB = b.match(/^(\d+)w(\d+)([a-z])$/)
+  if (snapshotA || snapshotB) {
+    if (snapshotA && !snapshotB) return 1
+    if (!snapshotA && snapshotB) return -1
+    if (snapshotA && snapshotB) {
+      const yearDiff = Number(snapshotB[1]) - Number(snapshotA[1])
+      if (yearDiff) return yearDiff
+      const weekDiff = Number(snapshotB[2]) - Number(snapshotA[2])
+      if (weekDiff) return weekDiff
+      return snapshotB[3].localeCompare(snapshotA[3])
+    }
+  }
+
+  const baseNums = (value: string) =>
+    (value.split('-')[0].match(/\d+/g) ?? []).map(Number)
+  const baseA = baseNums(a)
+  const baseB = baseNums(b)
+  const baseLength = Math.max(baseA.length, baseB.length)
+  for (let i = 0; i < baseLength; i++) {
+    const diff = (baseB[i] ?? 0) - (baseA[i] ?? 0)
+    if (diff) return diff
+  }
+
+  const rank = (value: string) => {
+    if (value.includes('-rc')) return 3
+    if (value.includes('-pre')) return 2
+    if (value.includes('-snapshot') || value.includes('-beta')) return 1
+    return 4
+  }
+  const rankDiff = rank(b) - rank(a)
+  if (rankDiff) return rankDiff
+
+  const numsA = (a.match(/\d+/g) ?? []).map(Number)
+  const numsB = (b.match(/\d+/g) ?? []).map(Number)
+  const length = Math.max(numsA.length, numsB.length)
+  for (let i = 0; i < length; i++) {
+    const diff = (numsB[i] ?? 0) - (numsA[i] ?? 0)
+    if (diff) return diff
+  }
+  return b.localeCompare(a)
+}
+
+const gameVersionOptions = computed(() => {
+  const values = new Set<string>()
+  versions.value.forEach((version) => version.game_versions.forEach((value) => values.add(value)))
+  return [...values].sort(compareVersions)
+})
+
+const loaderOptions = computed(() => {
+  const values = new Set<string>()
+  versions.value.forEach((version) => version.loaders.forEach((value) => values.add(value)))
+  return [...values]
+})
+
+const matchedVersion = computed(() =>
+  versions.value.find(
+    (version) =>
+      (!selectedGameVersion.value || version.game_versions.includes(selectedGameVersion.value)) &&
+      (!selectedLoader.value || version.loaders.includes(selectedLoader.value)),
+  ),
+)
+
+const matchedFile = computed(() => matchedVersion.value?.files[0] ?? null)
+
+const following = computed(() =>
+  project.value ? isFollowing(project.value.id) : false,
+)
+
+function followAction() {
+  if (!user.value) {
+    router.push('/login')
+    return
+  }
+  if (project.value) toggleFollow(project.value.id)
+}
+
+function openDownload() {
+  if (!selectedGameVersion.value && gameVersionOptions.value.length) {
+    selectedGameVersion.value = gameVersionOptions.value[0]
+  }
+  if (!selectedLoader.value && loaderOptions.value.length) {
+    selectedLoader.value = loaderOptions.value[0]
+  }
+  downloadOpen.value = true
+}
+
 function formatCount(value: number) {
   if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(2)}B`
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(2)}M`
@@ -75,6 +186,17 @@ function formatCount(value: number) {
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+async function copyProjectId() {
+  if (!project.value) return
+  try {
+    await navigator.clipboard.writeText(project.value.id)
+    copiedId.value = true
+    setTimeout(() => (copiedId.value = false), 1600)
+  } catch {
+    copiedId.value = false
+  }
 }
 
 function tagLabel(slug: string) {
@@ -90,19 +212,17 @@ async function load() {
   loading.value = true
   error.value = ''
   project.value = null
-  owner.value = null
   versions.value = []
   tab.value = 'about'
+  downloadOpen.value = false
+  selectedGameVersion.value = ''
+  selectedLoader.value = ''
+  expandedChangelogs.value = {}
   try {
     project.value = await getProject(slug)
     await nextTick()
     measureIndicator()
-    const [members, versionList] = await Promise.all([
-      getProjectMembers(slug).catch(() => []),
-      getProjectVersions(slug).catch(() => []),
-    ])
-    owner.value = members.find((member) => member.role === 'Owner') ?? members[0] ?? null
-    versions.value = versionList
+    versions.value = await getProjectVersions(slug, 100).catch(() => [])
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : 'Could not load this project.'
   } finally {
@@ -111,6 +231,13 @@ async function load() {
 }
 
 watch(() => route.params.slug, load)
+watch(
+  user,
+  (value) => {
+    if (value) loadFollows(value.id)
+  },
+  { immediate: true },
+)
 onMounted(load)
 </script>
 
@@ -137,22 +264,37 @@ onMounted(load)
         </span>
         <div class="project-page__identity">
           <h1 class="project-page__title">{{ project.title }}</h1>
-          <p v-if="owner" class="project-page__author">by {{ owner.user.username }}</p>
-          <p v-else class="project-page__author">{{ tagLabel(project.project_type) }}</p>
+          <div class="project-page__stats">
+            <span>
+              <span class="project-card__stat-icon" aria-hidden="true" v-html="downloadIcon"></span>
+              {{ formatCount(project.downloads) }} downloads
+            </span>
+            <span>
+              <span class="project-card__stat-icon" aria-hidden="true" v-html="heartIcon"></span>
+              {{ formatCount(project.followers) }} followers
+            </span>
+          </div>
+        </div>
+        <div class="project-page__actions">
+          <button
+            type="button"
+            class="project-page__follow"
+            :class="{ 'is-following': following }"
+            :aria-label="!user ? 'Sign in to follow' : following ? 'Unfollow project' : 'Follow project'"
+            @click="followAction"
+          >
+            <Heart :size="18" :stroke-width="2.5" :fill="following ? 'currentColor' : 'none'" />
+          </button>
+          <button type="button" class="project-page__download" @click="openDownload">
+            <span class="project-page__action-icon" aria-hidden="true" v-html="downloadIcon"></span>
+            Download
+          </button>
         </div>
       </header>
 
-      <div class="project-page__stats">
-        <span>
-          <span class="project-card__stat-icon" aria-hidden="true" v-html="downloadIcon"></span>
-          {{ formatCount(project.downloads) }}
-        </span>
-        <span>
-          <span class="project-card__stat-icon" aria-hidden="true" v-html="heartIcon"></span>
-          {{ formatCount(project.followers) }}
-        </span>
-        <span>Updated {{ formatDate(project.updated) }}</span>
-      </div>
+      <p v-if="followWriteError" class="project-page__hint">
+        This token can't follow projects. Add the Write user data scope and sign in again.
+      </p>
 
       <div class="project-page__tabs" role="tablist" aria-label="Project sections">
         <span
@@ -190,18 +332,44 @@ onMounted(load)
       <div v-else-if="tab === 'versions'">
         <Card v-for="version in versions" :key="version.id" class="version-card">
           <template #header>
-            <h2 class="version-card__title">{{ version.name }}</h2>
+            <div class="version-card__heading">
+              <h2 class="version-card__title">{{ version.name }}</h2>
+              <span class="version-card__number">{{ version.version_number }}</span>
+            </div>
           </template>
           <p class="version-card__meta">
-            {{ version.version_number }} · {{ formatDate(version.date_published) }} ·
-            {{ formatCount(version.downloads) }} downloads
+            {{ formatDate(version.date_published) }} · {{ formatCount(version.downloads) }} downloads
           </p>
-          <p v-if="version.changelog" class="version-card__changelog">{{ version.changelog }}</p>
           <div class="project-page__tags">
             <span v-for="loader in version.loaders.slice(0, 3)" :key="loader" class="project-card__tag">
               {{ tagLabel(loader) }}
             </span>
           </div>
+          <div
+            v-if="version.changelog"
+            class="version-card__changelog"
+            :class="{ 'is-expanded': expandedChangelogs[version.id] }"
+          >
+            <div class="markdown-body" v-html="renderMarkdown(version.changelog)"></div>
+          </div>
+          <button
+            v-if="version.changelog && version.changelog.length > 180"
+            type="button"
+            class="version-card__more"
+            @click="expandedChangelogs[version.id] = !expandedChangelogs[version.id]"
+          >
+            {{ expandedChangelogs[version.id] ? 'Show less' : 'Show more' }}
+          </button>
+          <a
+            v-if="version.files[0]"
+            class="version-card__download"
+            :href="version.files[0].url"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="project-page__action-icon" aria-hidden="true" v-html="downloadIcon"></span>
+            Download {{ version.files[0].filename }}
+          </a>
           <a
             class="version-card__link"
             :href="`https://modrinth.com/project/${project.slug}/version/${version.id}`"
@@ -225,7 +393,63 @@ onMounted(load)
       </div>
 
       <div v-else-if="tab === 'links'">
-        <p v-if="links.length === 0" class="project-page__message">No links listed.</p>
+        <Card class="info-card">
+          <template #header>
+            <h2 class="info-card__title">Project details</h2>
+          </template>
+          <div class="info-card__row">
+            <span>Project ID</span>
+            <span class="info-card__value info-card__value--id">
+              <code>{{ project.id }}</code>
+              <button type="button" class="info-card__copy" @click="copyProjectId">
+                {{ copiedId ? 'Copied' : 'Copy' }}
+              </button>
+            </span>
+          </div>
+          <div class="info-card__row">
+            <span>Type</span>
+            <span class="info-card__value">{{ tagLabel(project.project_type) }}</span>
+          </div>
+          <div class="info-card__row">
+            <span>Published</span>
+            <span class="info-card__value">{{ formatDate(project.published) }}</span>
+          </div>
+          <div class="info-card__row">
+            <span>Updated</span>
+            <span class="info-card__value">{{ formatDate(project.updated) }}</span>
+          </div>
+          <div v-if="project.license" class="info-card__row">
+            <span>License</span>
+            <span class="info-card__value">
+              <a :href="project.license.url" target="_blank" rel="noopener">
+                {{ project.license.name }}
+              </a>
+            </span>
+          </div>
+          <div class="info-card__row">
+            <span>Availability</span>
+            <span class="info-card__value">
+              Client {{ tagLabel(project.client_side) }} · Server {{ tagLabel(project.server_side) }}
+            </span>
+          </div>
+          <div class="info-card__row">
+            <span>Loaders</span>
+            <span class="info-card__value">
+              {{ project.loaders.slice(0, 3).map(tagLabel).join(', ')
+              }}<template v-if="project.loaders.length > 3"> +{{ project.loaders.length - 3 }} more</template>
+            </span>
+          </div>
+        </Card>
+
+        <h2 class="project-page__section-title">External links</h2>
+        <Card class="link-card">
+          <a :href="`https://modrinth.com/project/${project.slug}`" target="_blank" rel="noopener">
+            <span class="link-card__icon" aria-hidden="true" v-html="linkIcon('link')"></span>
+            <span class="link-card__label">View on Modrinth</span>
+            <ExternalLink :size="16" :stroke-width="2" class="link-card__external" />
+          </a>
+        </Card>
+        <p v-if="links.length === 0" class="project-page__message">No other links listed.</p>
         <Card v-for="link in links" :key="link.label + link.url" class="link-card">
           <a :href="link.url" target="_blank" rel="noopener">
             <span class="link-card__icon" aria-hidden="true" v-html="linkIcon(link.label)"></span>
@@ -235,5 +459,62 @@ onMounted(load)
         </Card>
       </div>
     </template>
+
+    <Teleport to="body">
+      <Transition name="pop">
+        <div v-if="downloadOpen" class="download-overlay" @click.self="downloadOpen = false">
+          <div class="download-dialog" role="dialog" aria-modal="true" aria-label="Download project">
+            <header class="download-dialog__header">
+              <div class="download-dialog__heading">
+                <img
+                  v-if="project?.icon_url"
+                  class="download-dialog__icon"
+                  :src="project.icon_url"
+                  alt=""
+                />
+                <span v-else class="download-dialog__icon download-dialog__icon--fallback">
+                  {{ project?.title.charAt(0) }}
+                </span>
+                <h2>Download {{ project?.title }}</h2>
+              </div>
+              <button type="button" aria-label="Close download" @click="downloadOpen = false">
+                <X :size="20" :stroke-width="2.5" />
+              </button>
+            </header>
+
+            <div class="download-dialog__body">
+              <p class="download-dialog__label">Download manually</p>
+              <div class="download-dialog__selects">
+                <SelectMenu
+                  v-model="selectedGameVersion"
+                  :options="gameVersionOptions"
+                  prefix="Game version"
+                  searchable
+                  show-all-toggle
+                  toggle-label="Show all versions"
+                />
+                <SelectMenu
+                  v-if="loaderOptions.length > 0"
+                  v-model="selectedLoader"
+                  :options="loaderOptions"
+                  prefix="Loader"
+                />
+              </div>
+              <a
+                v-if="matchedFile"
+                class="download-dialog__button"
+                :href="matchedFile.url"
+                target="_blank"
+                rel="noopener"
+              >
+                <span class="project-page__action-icon" aria-hidden="true" v-html="downloadIcon"></span>
+                Download {{ matchedFile.filename }}
+              </a>
+              <p v-else class="download-dialog__empty">No file matches that combination.</p>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </section>
 </template>
