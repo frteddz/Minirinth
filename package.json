@@ -1,0 +1,33 @@
+{
+  "name": "minirinth",
+  "version": "0.1.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit",
+    "cap:sync": "cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/preferences": "^8.0.1",
+    "@lucide/vue": "^1.77.0",
+    "vue": "^3.5.45",
+    "vue-router": "^4.6.5"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/cli": "^8.6.2",
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@vitejs/plugin-vue": "^6.0.11",
+    "autoprefixer": "^10.6.2",
+    "postcss": "^8.5.33",
+    "sass": "^1.108.2",
+    "tailwindcss": "^3.4.19",
+    "typescript": "~5.9.3",
+    "vite": "^8.3.8",
+    "vue-tsc": "^3.3.14"
+  }
+}
