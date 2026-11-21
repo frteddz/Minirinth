@@ -60,6 +60,72 @@ export function getUserProjects(userId: string): Promise<Project[]> {
   return apiFetch<Project[]>(`/user/${userId}/projects`)
 }
 
+export interface GalleryImage {
+  url: string
+  title: string | null
+  description: string | null
+  featured: boolean
+  created: string
+}
+
+export interface ProjectDetail extends Project {
+  body: string
+  additional_categories: string[]
+  client_side: string
+  server_side: string
+  source_url: string | null
+  issues_url: string | null
+  wiki_url: string | null
+  discord_url: string | null
+  donation_urls: { id: string; platform: string; url: string }[]
+  gallery: GalleryImage[]
+  game_versions: string[]
+  loaders: string[]
+  versions: string[]
+  followers: number
+  published: string
+  updated: string
+  color: number | null
+}
+
+export function getProject(slugOrId: string): Promise<ProjectDetail> {
+  return apiFetch<ProjectDetail>(`/project/${slugOrId}`)
+}
+
+export interface ProjectMember {
+  role: string
+  accepted: boolean
+  user: {
+    id: string
+    username: string
+    avatar_url: string | null
+  }
+}
+
+export function getProjectMembers(slugOrId: string): Promise<ProjectMember[]> {
+  return apiFetch<ProjectMember[]>(`/project/${slugOrId}/members`)
+}
+
+export interface ProjectVersion {
+  id: string
+  name: string
+  version_number: string
+  version_type: string
+  date_published: string
+  downloads: number
+  game_versions: string[]
+  loaders: string[]
+  changelog: string | null
+  files: { name: string; filename: string; url: string; size: number }[]
+}
+
+export function getProjectVersions(
+  slugOrId: string,
+  limit = 5,
+): Promise<ProjectVersion[]> {
+  return apiFetch<ProjectVersion[]>(`/project/${slugOrId}/version?limit=${limit}`)
+}
+
 export interface SearchHit {
   project_id: string
   slug: string
