@@ -35,7 +35,7 @@ Current build: v0.2.1-dev.
 
 ## Screenshots
 
-![Grid-2](docs/screenshots/grid-2.png)
+![Grid-2](docs/screenshots/grid-2-fix.png)
 ![Grid-1](docs/screenshots/grid-1.png)
 
 ## Running it (for devs)
