@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, ExternalLink, Heart, X } from '@lucide/vue'
+import { ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, Heart, X } from '@lucide/vue'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Card from '../ui/components/Card.vue'
@@ -8,13 +8,16 @@ import downloadIcon from '../assets/icons/download.svg?raw'
 import heartIcon from '../assets/icons/heart.svg?raw'
 import {
   getProject,
+  getProjectMembers,
   getProjectVersions,
   type ProjectDetail,
+  type ProjectMember,
   type ProjectVersion,
 } from '../api/client'
 import { renderMarkdown } from '../utils/markdown'
 import { tagIconSvg } from '../data/tag-icons'
 import { linkIcon } from '../utils/link-icons'
+import { userPath } from '../utils/user-path'
 import { useAuth } from '../composables/useAuth'
 import { useFollows } from '../composables/useFollows'
 
@@ -25,6 +28,7 @@ const { writeError: followWriteError, load: loadFollows, isFollowing, toggle: to
 
 const project = ref<ProjectDetail | null>(null)
 const versions = ref<ProjectVersion[]>([])
+const members = ref<ProjectMember[]>([])
 const tab = ref('about')
 const loading = ref(false)
 const error = ref('')
@@ -33,6 +37,65 @@ const selectedGameVersion = ref('')
 const selectedLoader = ref('')
 const copiedId = ref(false)
 const expandedChangelogs = ref<Record<string, boolean>>({})
+const galleryOpen = ref(false)
+const galleryIndex = ref(0)
+let galleryTouchX = 0
+
+function openGallery(index: number) {
+  galleryIndex.value = index
+  galleryOpen.value = true
+}
+
+function closeGallery() {
+  galleryOpen.value = false
+}
+
+function galleryStep(step: number) {
+  const length = project.value?.gallery.length ?? 0
+  if (length === 0) return
+  galleryIndex.value = (galleryIndex.value + step + length) % length
+}
+
+function onGalleryTouchStart(event: TouchEvent) {
+  galleryTouchX = event.changedTouches[0]?.clientX ?? 0
+}
+
+function onGalleryTouchEnd(event: TouchEvent) {
+  const endX = event.changedTouches[0]?.clientX ?? 0
+  const distance = endX - galleryTouchX
+  if (Math.abs(distance) < 50) return
+  galleryStep(distance < 0 ? 1 : -1)
+}
+
+async function downloadGalleryImage() {
+  const image = project.value?.gallery[galleryIndex.value]
+  if (!image) return
+
+  const extension = image.url.includes('.png') ? 'png' : image.url.includes('.webp') ? 'webp' : 'jpg'
+  const name = (image.title?.trim() || `gallery-${galleryIndex.value + 1}`)
+    .replace(/[^a-z0-9-_]+/gi, '-')
+    .toLowerCase()
+
+  try {
+    const response = await fetch(image.url)
+    if (!response.ok) throw new Error('Download failed')
+    const blob = await response.blob()
+    const objectUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = objectUrl
+    link.download = `${name}.${extension}`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
+  } catch {
+    window.open(image.url, '_blank', 'noopener')
+  }
+}
+
+watch(galleryOpen, (open) => {
+  document.body.style.overflow = open ? 'hidden' : ''
+})
 
 watch(downloadOpen, (open) => {
   if (open) {
@@ -44,7 +107,7 @@ watch(downloadOpen, (open) => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', measureIndicator)
-  if (downloadOpen.value) document.body.style.overflow = ''
+  if (downloadOpen.value || galleryOpen.value) document.body.style.overflow = ''
 })
 
 const tabs = [
@@ -213,6 +276,7 @@ async function load() {
   error.value = ''
   project.value = null
   versions.value = []
+  members.value = []
   tab.value = 'about'
   downloadOpen.value = false
   selectedGameVersion.value = ''
@@ -223,6 +287,7 @@ async function load() {
     await nextTick()
     measureIndicator()
     versions.value = await getProjectVersions(slug, 100).catch(() => [])
+    members.value = await getProjectMembers(slug).catch(() => [])
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : 'Could not load this project.'
   } finally {
@@ -244,7 +309,7 @@ onMounted(load)
 <template>
   <section class="page project-page">
     <button type="button" class="project-page__back" aria-label="Go back" @click="router.back()">
-      <ArrowLeft :size="20" :stroke-width="2.5" />
+      <ArrowLeft :size="24" :stroke-width="2.5" />
       <span>Back</span>
     </button>
 
@@ -386,7 +451,14 @@ onMounted(load)
       <div v-else-if="tab === 'gallery'">
         <p v-if="project.gallery.length === 0" class="project-page__message">No gallery images.</p>
         <Card v-for="(image, index) in project.gallery" :key="index" class="gallery-card">
-          <img class="gallery-card__image" :src="image.url" :alt="image.title ?? project.title" />
+          <button
+            type="button"
+            class="gallery-card__open"
+            :aria-label="`View ${image.title ?? project.title}`"
+            @click="openGallery(index)"
+          >
+            <img class="gallery-card__image" :src="image.url" :alt="image.title ?? project.title" />
+          </button>
           <h2 v-if="image.title" class="gallery-card__title">{{ image.title }}</h2>
           <p v-if="image.description" class="gallery-card__description">{{ image.description }}</p>
         </Card>
@@ -439,6 +511,36 @@ onMounted(load)
               }}<template v-if="project.loaders.length > 3"> +{{ project.loaders.length - 3 }} more</template>
             </span>
           </div>
+        </Card>
+
+        <Card class="info-card">
+          <template #header>
+            <h2 class="info-card__title">People</h2>
+          </template>
+          <p v-if="members.length === 0" class="project-page__message">
+            No member information available.
+          </p>
+          <button
+            v-for="member in members"
+            :key="member.user.id"
+            type="button"
+            class="project-page__member"
+            @click="router.push(userPath(member.user.username))"
+          >
+            <img
+              v-if="member.user.avatar_url"
+              class="project-page__member-avatar"
+              :src="member.user.avatar_url"
+              :alt="`${member.user.username} avatar`"
+            />
+            <span v-else class="project-page__member-avatar project-page__member-avatar--fallback">
+              {{ member.user.username.charAt(0).toUpperCase() }}
+            </span>
+            <span class="project-page__member-copy">
+              <span class="project-page__member-name">{{ member.user.username }}</span>
+              <span class="project-page__member-role">{{ tagLabel(member.role) }}</span>
+            </span>
+          </button>
         </Card>
 
         <h2 class="project-page__section-title">External links</h2>
@@ -515,6 +617,71 @@ onMounted(load)
           </div>
         </div>
       </Transition>
+    </Teleport>
+
+    <Teleport to="body">
+      <div v-if="galleryOpen && project" class="gallery-viewer" role="dialog" aria-modal="true" aria-label="Gallery image">
+        <div class="gallery-viewer__top">
+          <span class="gallery-viewer__counter">
+            {{ galleryIndex + 1 }} / {{ project.gallery.length }}
+          </span>
+          <div class="gallery-viewer__actions">
+            <button
+              type="button"
+              class="gallery-viewer__download"
+              aria-label="Download image"
+              @click="downloadGalleryImage"
+            >
+              <span class="gallery-viewer__download-icon" aria-hidden="true" v-html="downloadIcon"></span>
+              <span>Download</span>
+            </button>
+            <button type="button" class="gallery-viewer__close" aria-label="Close gallery" @click="closeGallery">
+              <X :size="24" :stroke-width="2.5" />
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="gallery-viewer__stage"
+          @touchstart="onGalleryTouchStart"
+          @touchend="onGalleryTouchEnd"
+          @click.self="closeGallery"
+        >
+          <img
+            v-if="project.gallery[galleryIndex]"
+            class="gallery-viewer__image"
+            :src="project.gallery[galleryIndex].url"
+            :alt="project.gallery[galleryIndex].title ?? project.title"
+          />
+        </div>
+
+        <div class="gallery-viewer__bottom">
+          <button
+            type="button"
+            class="gallery-viewer__nav"
+            aria-label="Previous image"
+            @click="galleryStep(-1)"
+          >
+            <ChevronLeft :size="24" :stroke-width="2.5" />
+          </button>
+          <div v-if="project.gallery[galleryIndex]" class="gallery-viewer__caption">
+            <p v-if="project.gallery[galleryIndex].title" class="gallery-viewer__title">
+              {{ project.gallery[galleryIndex].title }}
+            </p>
+            <p v-if="project.gallery[galleryIndex].description" class="gallery-viewer__description">
+              {{ project.gallery[galleryIndex].description }}
+            </p>
+          </div>
+          <button
+            type="button"
+            class="gallery-viewer__nav"
+            aria-label="Next image"
+            @click="galleryStep(1)"
+          >
+            <ChevronRight :size="24" :stroke-width="2.5" />
+          </button>
+        </div>
+      </div>
     </Teleport>
   </section>
 </template>

@@ -4,6 +4,13 @@ import CategoryView from '../views/CategoryView.vue'
 import SearchView from '../views/SearchView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import LoginView from '../views/LoginView.vue'
+import SettingsView from '../views/SettingsView.vue'
+import DashboardView from '../views/DashboardView.vue'
+import AnalyticsView from '../views/AnalyticsView.vue'
+import NotificationsView from '../views/NotificationsView.vue'
+import UserView from '../views/UserView.vue'
+import OAuthCallbackView from '../views/OAuthCallbackView.vue'
+import CreditsView from '../views/CreditsView.vue'
 import ProjectView from '../views/ProjectView.vue'
 
 const router = createRouter({
@@ -12,7 +19,14 @@ const router = createRouter({
     { path: '/', name: 'home', component: HomeView },
     { path: '/search', name: 'search', component: SearchView },
     { path: '/profile', name: 'profile', component: ProfileView },
+    { path: '/notifications', name: 'notifications', component: NotificationsView },
+    { path: '/user/:username', name: 'user', component: UserView },
     { path: '/login', name: 'login', component: LoginView },
+    { path: '/oauth/callback', name: 'oauth-callback', component: OAuthCallbackView },
+    { path: '/settings', name: 'settings', component: SettingsView },
+    { path: '/dashboard', name: 'dashboard', component: DashboardView },
+    { path: '/analytics', name: 'analytics', component: AnalyticsView },
+    { path: '/credits', name: 'credits', component: CreditsView },
     { path: '/mod/:slug', name: 'project-mod', component: ProjectView, meta: { project: true } },
     { path: '/shader/:slug', name: 'project-shader', component: ProjectView, meta: { project: true } },
     {

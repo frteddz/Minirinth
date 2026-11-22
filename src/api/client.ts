@@ -1,5 +1,8 @@
 const API_BASE_URL = 'https://api.modrinth.com/v2'
-const USER_AGENT = 'Minirynth/0.2.1 (Unofficial mobile port for Modrinth)'
+const API_V3_BASE_URL = 'https://api.modrinth.com/v3'
+const USER_AGENT = 'Minirynth/0.3.0 (Unofficial mobile port for Modrinth)'
+const CACHE_PREFIX = 'minirynth.cache.'
+const CACHE_TTL = 10 * 60 * 1000
 
 let authToken: string | null = null
 
@@ -9,6 +12,36 @@ export function setAuthToken(token: string | null) {
 
 export function getAuthToken() {
   return authToken
+}
+
+async function cached<T>(key: string, load: () => Promise<T>): Promise<T> {
+  const storageKey = CACHE_PREFIX + key
+  try {
+    const raw = localStorage.getItem(storageKey)
+    if (raw) {
+      const entry = JSON.parse(raw) as { savedAt: number; value: T }
+      if (Date.now() - entry.savedAt < CACHE_TTL) return entry.value
+    }
+  } catch {
+    void 0
+  }
+
+  const value = await load()
+  try {
+    localStorage.setItem(storageKey, JSON.stringify({ savedAt: Date.now(), value }))
+  } catch {
+    void 0
+  }
+  return value
+}
+
+export function clearApiCache() {
+  try {
+    const keys = Object.keys(localStorage).filter((key) => key.startsWith(CACHE_PREFIX))
+    keys.forEach((key) => localStorage.removeItem(key))
+  } catch {
+    void 0
+  }
 }
 
 // The WebView ignores a User-Agent set from JS, so MainActivity appends the same
@@ -33,16 +66,41 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   return response.json() as Promise<T>
 }
 
+export async function apiFetchV3<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await fetch(`${API_V3_BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      Accept: 'application/json',
+      'User-Agent': USER_AGENT,
+      ...(authToken ? { Authorization: authToken } : {}),
+      ...init.headers,
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error(`Modrinth API returned ${response.status} for ${path}`)
+  }
+
+  return response.json() as Promise<T>
+}
+
 export interface ModrinthUser {
   id: string
   username: string
   avatar_url: string | null
   bio?: string
   created: string
+  role?: string
 }
 
 export function getCurrentUser(): Promise<ModrinthUser> {
   return apiFetch<ModrinthUser>('/user')
+}
+
+export function getUser(idOrUsername: string): Promise<ModrinthUser> {
+  return cached(`user:${idOrUsername}`, () =>
+    apiFetch<ModrinthUser>(`/user/${encodeURIComponent(idOrUsername)}`),
+  )
 }
 
 export interface Project {
@@ -53,6 +111,7 @@ export interface Project {
   project_type: string
   downloads: number
   follows: number | null
+  followers?: number
   icon_url: string | null
   categories: string[]
   status: string
@@ -104,7 +163,7 @@ export interface ProjectDetail extends Project {
 }
 
 export function getProject(slugOrId: string): Promise<ProjectDetail> {
-  return apiFetch<ProjectDetail>(`/project/${slugOrId}`)
+  return cached(`project:${slugOrId}`, () => apiFetch<ProjectDetail>(`/project/${slugOrId}`))
 }
 
 export interface ProjectMember {
@@ -118,7 +177,9 @@ export interface ProjectMember {
 }
 
 export function getProjectMembers(slugOrId: string): Promise<ProjectMember[]> {
-  return apiFetch<ProjectMember[]>(`/project/${slugOrId}/members`)
+  return cached(`project:${slugOrId}:members`, () =>
+    apiFetch<ProjectMember[]>(`/project/${slugOrId}/members`),
+  )
 }
 
 export interface ProjectVersion {
@@ -138,7 +199,9 @@ export function getProjectVersions(
   slugOrId: string,
   limit = 5,
 ): Promise<ProjectVersion[]> {
-  return apiFetch<ProjectVersion[]>(`/project/${slugOrId}/version?limit=${limit}`)
+  return cached(`project:${slugOrId}:versions:${limit}`, () =>
+    apiFetch<ProjectVersion[]>(`/project/${slugOrId}/version?limit=${limit}`),
+  )
 }
 
 export interface Notification {
@@ -204,5 +267,55 @@ export function searchProjects(params: SearchParams): Promise<SearchResponse> {
   if (params.facets) search.set('facets', params.facets)
   if (params.limit !== undefined) search.set('limit', String(params.limit))
   if (params.offset !== undefined) search.set('offset', String(params.offset))
-  return apiFetch<SearchResponse>(`/search?${search.toString()}`)
+  return cached(`search:${search.toString()}`, () =>
+    apiFetch<SearchResponse>(`/search?${search.toString()}`),
+  )
+}
+
+export interface AnalyticsMetrics {
+  bucket_by?: string[]
+  filter_by?: Record<string, string[] | boolean[]>
+}
+
+export interface AnalyticsRequest {
+  time_range: {
+    start: string
+    end: string
+    resolution: { slices: number }
+  }
+  return_metrics: {
+    project_views?: AnalyticsMetrics
+    project_downloads?: AnalyticsMetrics
+    project_playtime?: AnalyticsMetrics
+  }
+  project_ids?: string[]
+}
+
+export interface AnalyticsEntry {
+  source_project: string
+  metric_kind: 'views' | 'downloads' | 'playtime' | 'revenue'
+  views?: number
+  downloads?: number
+  seconds?: number
+  revenue?: string
+}
+
+export interface AnalyticsProject {
+  id: string
+  slug: string
+  name: string
+  icon_url: string | null
+}
+
+export interface AnalyticsResponse {
+  metrics: AnalyticsEntry[][]
+  projects: Record<string, AnalyticsProject>
+}
+
+export function getAnalytics(request: AnalyticsRequest): Promise<AnalyticsResponse> {
+  return apiFetchV3<AnalyticsResponse>('/analytics', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  })
 }

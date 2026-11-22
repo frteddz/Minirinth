@@ -8,32 +8,40 @@ import general from '../../assets/notification-sfx/457518__graham_makes__chord-a
 
 import type { Notification } from '../api/client'
 
-export function soundForNotification(notification: Notification) {
+export const soundUrls = {
+  projectApproved: approved,
+  projectRejected: rejected,
+  teamInvite,
+  moderatorMessage,
+  projectUpdated,
+  versionReleased,
+  general,
+}
+
+export type NotificationSoundId = keyof typeof soundUrls
+
+export function soundKeyForNotification(notification: Notification): NotificationSoundId {
   const text = `${notification.title} ${notification.text}`.toLowerCase()
 
-  if (notification.type === 'team_invite') return teamInvite
-  if (notification.type === 'moderator_message') return moderatorMessage
+  if (notification.type === 'team_invite') return 'teamInvite'
+  if (notification.type === 'moderator_message') return 'moderatorMessage'
 
   if (notification.type === 'status_change') {
-    if (/approv|accept|public/.test(text)) return approved
-    if (/reject|denied|unapprov/.test(text)) return rejected
-    return general
+    if (/approv|accept|public/.test(text)) return 'projectApproved'
+    if (/reject|denied|unapprov/.test(text)) return 'projectRejected'
+    return 'general'
   }
 
   if (notification.type === 'project_update') {
     if (notification.link.includes('/version/') || /version|released|published/.test(text)) {
-      return versionReleased
+      return 'versionReleased'
     }
-    return projectUpdated
+    return 'projectUpdated'
   }
 
-  return general
+  return 'general'
 }
 
-export function playNotificationSound(notification: Notification) {
-  const audio = new Audio(soundForNotification(notification))
-  audio.volume = 0.85
-  void audio.play().catch(() => {
-    // Audio can be blocked until the user has interacted with the page.
-  })
+export function soundForNotification(notification: Notification) {
+  return soundUrls[soundKeyForNotification(notification)]
 }

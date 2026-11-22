@@ -5,7 +5,9 @@ import {
   markNotificationsRead,
   type Notification,
 } from '../api/client'
-import { playNotificationSound } from '../utils/notification-sound'
+import { useNotificationSettings } from './useNotificationSettings'
+
+const { playForNotification } = useNotificationSettings()
 
 const notifications = ref<Notification[]>([])
 const scopeError = ref(false)
@@ -39,7 +41,7 @@ export function useNotifications() {
       notifications.value = next
       next.forEach((item) => knownIds.add(item.id))
       hasLoaded = true
-      if (fresh.length > 0) playNotificationSound(newestByDate(fresh))
+      if (fresh.length > 0) playForNotification(newestByDate(fresh))
     } catch (cause) {
       notifications.value = []
       scopeError.value = isScopeError(cause)

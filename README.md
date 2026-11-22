@@ -6,7 +6,7 @@ Unofficial mobile port for Modrinth. Browse mods, resource packs, shaders, data 
 
 Vue 3, TypeScript and Vite, wrapped for Android with Capacitor. Powered by the [Modrinth API](https://modrinth.com), not affiliated with Modrinth.
 
-Current build: v0.2.1-dev.
+Current build: v0.3.0-dev.
 
 ## Contents
 
@@ -19,18 +19,21 @@ Current build: v0.2.1-dev.
 
 ## What works now
 
-- Browse mods, shaders, resource packs, data packs, modpacks and plugins with real API results.
+- Browse mods, shaders, resource packs, data packs, modpacks and plugins with real API results, plus a Feeling Lucky button.
 - Search by title, author, description or slug, then narrow things down with filters, sorting and pagination.
-- Open a project to see its description, tags, versions, gallery and external links.
+- Open a project to see its description, tags, versions, gallery and external links. The gallery viewer supports swiping, next and previous, captions and image downloads.
 - Project pages use type based links like `/mod/fabric-api` and `/shader/sodium`.
-- Sign in with a Modrinth personal access token to see your profile, published projects, download counts and bio.
+- Sign in with your Modrinth account through OAuth. A personal access token still works as a fallback, and you can save a few accounts and switch between them without signing out.
+- See your profile, published projects, download counts and bio.
+- Follow projects and read your notifications on their own page.
+- Creator tools: a dashboard and analytics with download and follower stats.
+- Open public user profiles from project pages and project member lists.
+- Eight themes and per-sound notification volume controls.
 - A floating dock that hides when you scroll down and returns when you scroll up.
 
 ## Coming later
 
 - Creating projects, uploading versions and editing descriptions.
-- Viewing other profiles
-- Logging in from Modrinth ([Modrinth API docs](https://docs.modrinth.com/))
 - More to come i just don't know what..
 
 ## Screenshots

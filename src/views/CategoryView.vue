@@ -8,6 +8,7 @@ import { categories } from '../data/categories'
 import { tagIconSvg, tagSlug } from '../data/tag-icons'
 import { useCategoryFilters } from '../composables/useCategoryFilters'
 import { projectPath } from '../utils/project-path'
+import { userPath } from '../utils/user-path'
 import { searchProjects, type SearchHit } from '../api/client'
 import downloadIcon from '../assets/icons/download.svg?raw'
 import heartIcon from '../assets/icons/heart.svg?raw'
@@ -26,6 +27,8 @@ const sort = ref<Sort>('Relevance')
 const pageSize = ref(10)
 const query = ref('')
 const currentPage = ref(1)
+const luckyLoading = ref(false)
+const luckyError = ref('')
 
 const hits = ref<SearchHit[]>([])
 const totalHits = ref(0)
@@ -131,6 +134,37 @@ async function load() {
   }
 }
 
+async function feelingLucky() {
+  luckyLoading.value = true
+  luckyError.value = ''
+  try {
+    const probe = await searchProjects({
+      query: query.value.trim(),
+      facets: buildFacets(),
+      limit: 1,
+      offset: 0,
+    })
+    if (probe.total_hits === 0) {
+      luckyError.value = 'No projects found for these filters.'
+      return
+    }
+
+    const offset = Math.floor(Math.random() * probe.total_hits)
+    const result = await searchProjects({
+      query: query.value.trim(),
+      facets: buildFacets(),
+      limit: 1,
+      offset,
+    })
+    const hit = result.hits[0]
+    if (hit) router.push(projectPath(hit.project_type, hit.slug))
+  } catch (cause) {
+    luckyError.value = cause instanceof Error ? cause.message : 'Could not pick a project.'
+  } finally {
+    luckyLoading.value = false
+  }
+}
+
 function scheduleLoad() {
   if (timer) clearTimeout(timer)
   timer = setTimeout(load, 250)
@@ -164,7 +198,17 @@ onUnmounted(() => {
   <section v-if="category" class="page category">
     <header class="category__header">
       <h1 class="page__title">{{ category.title }}</h1>
+      <button
+        type="button"
+        class="category__lucky"
+        :disabled="luckyLoading"
+        @click="feelingLucky"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dices preview-icon"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
+        <span>{{ luckyLoading ? 'Picking...' : "I'm feeling lucky" }}</span>
+      </button>
     </header>
+    <p v-if="luckyError" class="creator__error category__lucky-error">{{ luckyError }}</p>
 
     <label class="category__search">
       <Search :size="18" :stroke-width="2" aria-hidden="true" />
@@ -249,7 +293,13 @@ onUnmounted(() => {
         <div class="project-card__body">
           <h2 class="project-card__title">
             {{ project.title }}
-            <span class="project-card__author">by {{ project.author }}</span>
+            <button
+              type="button"
+              class="project-card__author"
+              @click.stop="router.push(userPath(project.author))"
+            >
+              by {{ project.author }}
+            </button>
           </h2>
           <p class="project-card__description">{{ project.description }}</p>
 
