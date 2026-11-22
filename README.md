@@ -25,15 +25,18 @@ Current build: v0.4.7-dev.
 - Project pages use type based links like `/mod/fabric-api` and `/shader/sodium`.
 - Sign in with your Modrinth account through OAuth. A personal access token still works as a fallback, and you can save a few accounts and switch between them without signing out.
 - See your profile, published projects, download counts and bio.
-- Follow projects and read your notifications on their own page.
+- Follow projects and read your notifications on their own page. Notifications can pop up with custom sounds even while the app is in the background.
 - Creator tools: a dashboard and analytics with download and follower stats.
+- Create, edit and delete projects. Edit descriptions, tags, license, links, icons and gallery images.
+- Upload, edit and delete versions, including extra files and dependencies.
+- Join, leave, create and edit organizations. Manage members, roles, ownership and project transfers.
 - Open public user profiles from project pages and project member lists.
 - Eight themes and per-sound notification volume controls.
 - A floating dock that hides when you scroll down and returns when you scroll up.
 
 ## Coming later
 
-- Creating projects, uploading versions and editing descriptions.
+- Scheduling releases, collections, content disclosures and payouts.
 - More to come i just don't know what..
 
 ## Screenshots
@@ -62,7 +65,7 @@ Prebuilt Android APKs are on the [releases page](https://github.com/frteddz/Mini
 
 ## Licensing
 
-GPLv3, see [LICENSE](LICENSE). Base styles and components copied from the Modrinth monorepo live in `src/ui/` and stay GPLv3. See `src/ui/COPYING.md` for what was copied and what was left out. No Modrinth logo or wordmark is used. The logo and green accent come from the Minirynth pack in `assets/minirynth-logos/`.
+GPLv3, see [LICENSE](LICENSE). Base styles and components copied from the Modrinth monorepo live in `src/ui/` and stay GPLv3. See `src/ui/COPYING.md` for what was copied and what was left out. No Modrinth logo or wordmark is used. The logo and green accent come from the Minirynth pack in `assets/minirynth/`.
 
 Credits:
 
