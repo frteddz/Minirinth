@@ -36,7 +36,7 @@ Current build: v0.4.7-dev.
 
 ## Coming soon
 
-- Adding mods to your Modrinth instance from the phone. This one will be big and hard, so it is a later thing.
+- Adding mods, resource packs, data packs, and so on to your Modrinth instance from Minirynth where ever you are. for example: you are having a vacation on a beach in Hawaii and for a random reason a thought popped in your head that you wanna add a mod to your Modrinth instance but you can't since your miles away from your pc, so you download Minirynth and just by a couple clicks of a button (i hope so) the mod is automatically added to your Modrinth instance. soo yea.. this one will be big and difficult (as far as i know), so this will be later on. (There is no specific date for this yet)
 - Scheduling releases, collections, content disclosures and payouts.
 - More to come i just don't know what..
 
