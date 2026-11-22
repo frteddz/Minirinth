@@ -7,6 +7,7 @@ import { useAuth } from '../composables/useAuth'
 import bellIcon from '../assets/icons/notifications/bell.svg?raw'
 import menuIcon from '../assets/icons/menu.svg?raw'
 import userIcon from '../assets/icons/user.svg?raw'
+import organizationIcon from '../assets/icons/organization.svg?raw'
 
 const route = useRoute()
 const router = useRouter()
@@ -124,6 +125,12 @@ function openDashboard() {
   router.push('/dashboard')
 }
 
+function openOrganizations() {
+  menuOpen.value = false
+  closeSearch()
+  router.push('/organizations')
+}
+
 function openAnalytics() {
   menuOpen.value = false
   closeSearch()
@@ -219,7 +226,26 @@ function openSignIn() {
     <Transition name="pop">
       <div v-if="menuOpen" class="menu-overlay" @click.self="menuOpen = false">
         <div class="menu-popover" role="menu" aria-label="Account menu">
-          <button type="button" class="menu-popover__item" role="menuitem" @click="openProfile">
+          <button
+            v-if="!user"
+            type="button"
+            class="menu-popover__item menu-popover__item--signin"
+            role="menuitem"
+            @click="openSignIn"
+          >
+            <span class="menu-popover__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-in preview-icon"><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/></svg>
+            </span>
+            <span>Sign in</span>
+          </button>
+          <div v-if="!user" class="menu-popover__divider" role="separator"></div>
+          <button
+            v-if="user"
+            type="button"
+            class="menu-popover__item"
+            role="menuitem"
+            @click="openProfile"
+          >
             <span class="menu-popover__icon" aria-hidden="true" v-html="userIcon"></span>
             <span>Profile</span>
           </button>
@@ -228,6 +254,12 @@ function openSignIn() {
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard preview-icon"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
             </span>
             <span>Dashboard</span>
+          </button>
+          <button type="button" class="menu-popover__item" role="menuitem" @click="openOrganizations">
+            <span class="menu-popover__icon" aria-hidden="true">
+              <span aria-hidden="true" v-html="organizationIcon"></span>
+            </span>
+            <span>Organizations</span>
           </button>
           <button type="button" class="menu-popover__item" role="menuitem" @click="openAnalytics">
             <span class="menu-popover__icon" aria-hidden="true">
@@ -246,26 +278,26 @@ function openSignIn() {
             </span>
             <span>Settings</span>
           </button>
-          <div class="menu-popover__divider" role="separator"></div>
-          <button type="button" class="menu-popover__item" role="menuitem" @click="openAccountBubble">
-            <span class="menu-popover__icon" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-right preview-icon"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>
-            </span>
-            <span>Switch account</span>
-          </button>
-          <button
-            type="button"
-            class="menu-popover__item"
-            :class="user ? 'menu-popover__item--danger' : 'menu-popover__item--accent'"
-            role="menuitem"
-            @click="user ? requestLogout() : openSignIn()"
-          >
-            <span class="menu-popover__icon" aria-hidden="true">
-              <svg v-if="user" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out preview-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-in preview-icon"><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/></svg>
-            </span>
-            <span>{{ user ? 'Log out' : 'Sign in' }}</span>
-          </button>
+          <template v-if="user">
+            <div class="menu-popover__divider" role="separator"></div>
+            <button type="button" class="menu-popover__item" role="menuitem" @click="openAccountBubble">
+              <span class="menu-popover__icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left-right preview-icon"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>
+              </span>
+              <span>Switch account</span>
+            </button>
+            <button
+              type="button"
+              class="menu-popover__item menu-popover__item--danger"
+              role="menuitem"
+              @click="requestLogout"
+            >
+              <span class="menu-popover__icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out preview-icon"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+              </span>
+              <span>Log out</span>
+            </button>
+          </template>
         </div>
       </div>
     </Transition>
@@ -343,7 +375,7 @@ function openSignIn() {
       <div class="confirm-dialog card" role="dialog" aria-modal="true" aria-labelledby="logout-dialog-title">
         <h2 id="logout-dialog-title" class="confirm-dialog__title">Log out?</h2>
         <p class="confirm-dialog__text">
-          This removes your saved account from this device. You can sign in again anytime.
+          This removes this account from the device. If you have another saved account, you'll switch to it.
         </p>
         <div class="confirm-dialog__actions">
           <button type="button" class="confirm-dialog__cancel" @click="closeLogoutConfirm">

@@ -1,6 +1,9 @@
 import { Preferences } from '@capacitor/preferences'
 import { computed, ref } from 'vue'
 import { getCurrentUser, setAuthToken, type ModrinthUser } from '../api/client'
+import { useSystemNotifications } from './useSystemNotifications'
+
+const { requestPermission, syncBackgroundAuth, clearBackgroundAuth } = useSystemNotifications()
 
 const TOKEN_KEY = 'minirynth.pat'
 const EXPIRY_KEY = 'minirynth.oauth.expires'
@@ -17,6 +20,7 @@ export interface SavedAccount {
 const user = ref<ModrinthUser | null>(null)
 const loading = ref(false)
 const error = ref('')
+let restorePromise: Promise<void> | null = null
 
 function loadAccounts(): SavedAccount[] {
   try {
@@ -75,18 +79,24 @@ export function useAuth() {
     user.value ? accounts.value.find((item) => item.id === user.value?.id) ?? null : null,
   )
 
-  async function restore() {
-    const { value: expiry } = await Preferences.get({ key: EXPIRY_KEY })
-    if (expiry && Date.now() > Number(expiry)) {
-      await clearToken()
-      error.value = 'Session expired. Sign in again.'
-      return
-    }
+  function restore() {
+    if (restorePromise) return restorePromise
+    restorePromise = (async () => {
+      const { value: expiry } = await Preferences.get({ key: EXPIRY_KEY })
+      if (expiry && Date.now() > Number(expiry)) {
+        await clearToken()
+        clearBackgroundAuth()
+        error.value = 'Session expired. Sign in again.'
+        return
+      }
 
-    const { value } = await Preferences.get({ key: TOKEN_KEY })
-    if (!value) return
-    setAuthToken(value)
-    await loadUser()
+      const { value } = await Preferences.get({ key: TOKEN_KEY })
+      if (!value) return
+      setAuthToken(value)
+      await loadUser()
+      if (user.value) syncBackgroundAuth(value, user.value.id, expiry ? Number(expiry) : undefined)
+    })()
+    return restorePromise
   }
 
   async function signIn(token: string, expiresAt?: number) {
@@ -111,7 +121,21 @@ export function useAuth() {
         token: clean,
         expiresAt,
       })
+      syncBackgroundAuth(clean, user.value.id, expiresAt, true)
+      void requestPermission()
     }
+  }
+
+  async function activateAccount(account: SavedAccount, reset = false) {
+    if (account.expiresAt) {
+      await Preferences.set({ key: EXPIRY_KEY, value: String(account.expiresAt) })
+    } else {
+      await Preferences.remove({ key: EXPIRY_KEY })
+    }
+    await Preferences.set({ key: TOKEN_KEY, value: account.token })
+    setAuthToken(account.token)
+    await loadUser()
+    if (user.value) syncBackgroundAuth(account.token, user.value.id, account.expiresAt, reset)
   }
 
   async function switchAccount(id: string) {
@@ -122,22 +146,27 @@ export function useAuth() {
       forgetAccount(account.id)
       return
     }
-
-    if (account.expiresAt) {
-      await Preferences.set({ key: EXPIRY_KEY, value: String(account.expiresAt) })
-    } else {
-      await Preferences.remove({ key: EXPIRY_KEY })
-    }
-    await Preferences.set({ key: TOKEN_KEY, value: account.token })
-    setAuthToken(account.token)
-    await loadUser()
+    await activateAccount(account, true)
   }
 
   async function signOut() {
     const id = user.value?.id
-    await clearToken()
     if (id) forgetAccount(id)
     error.value = ''
+
+    while (accounts.value.length > 0) {
+      const next = accounts.value[0]
+      if (next.expiresAt && Date.now() > next.expiresAt) {
+        forgetAccount(next.id)
+        continue
+      }
+      await activateAccount(next, true)
+      if (user.value) return
+      forgetAccount(next.id)
+    }
+
+    await clearToken()
+    clearBackgroundAuth()
   }
 
   return { user, loading, error, accounts, currentAccount, restore, signIn, switchAccount, signOut }

@@ -20,6 +20,28 @@ export const soundUrls = {
 
 export type NotificationSoundId = keyof typeof soundUrls
 
+export const soundChannelIds: Record<NotificationSoundId, string> = {
+  projectApproved: 'minirynth_project_approved',
+  projectRejected: 'minirynth_project_rejected',
+  teamInvite: 'minirynth_team_invite',
+  moderatorMessage: 'minirynth_moderator_message',
+  projectUpdated: 'minirynth_project_updated',
+  versionReleased: 'minirynth_version_released',
+  general: 'minirynth_general',
+}
+
+export const soundChannelFiles: Record<NotificationSoundId, string> = {
+  projectApproved: 'sound_project_approved.wav',
+  projectRejected: 'sound_project_rejected.wav',
+  teamInvite: 'sound_team_invite.wav',
+  moderatorMessage: 'sound_moderator_message.wav',
+  projectUpdated: 'sound_project_updated.wav',
+  versionReleased: 'sound_version_released.wav',
+  general: 'sound_general.wav',
+}
+
+export const silentChannelId = 'minirynth_silent'
+
 export function soundKeyForNotification(notification: Notification): NotificationSoundId {
   const text = `${notification.title} ${notification.text}`.toLowerCase()
 

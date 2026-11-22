@@ -16,6 +16,16 @@ import serverEnv from '../assets/environment/server.svg?raw'
 import minecraft from '../assets/simple-icons/minecraft.svg?raw'
 
 import adventure from '../assets/tag-icons/adventure.svg?raw'
+import audio from '../assets/tag-icons/audio.svg?raw'
+import blocks from '../assets/tag-icons/blocks.svg?raw'
+import coreShaders from '../assets/tag-icons/core-shaders.svg?raw'
+import entities from '../assets/tag-icons/entities.svg?raw'
+import environmentCategory from '../assets/tag-icons/environment.svg?raw'
+import fonts from '../assets/tag-icons/fonts.svg?raw'
+import gui from '../assets/tag-icons/gui.svg?raw'
+import items from '../assets/tag-icons/items.svg?raw'
+import locale from '../assets/tag-icons/locale.svg?raw'
+import models from '../assets/tag-icons/models.svg?raw'
 import atmosphere from '../assets/tag-icons/atmosphere.svg?raw'
 import bloom from '../assets/tag-icons/bloom.svg?raw'
 import cartoon from '../assets/tag-icons/cartoon.svg?raw'
@@ -65,7 +75,17 @@ import worldgen from '../assets/tag-icons/worldgen.svg?raw'
 
 const icons: Record<string, string> = {
   adventure,
+  audio,
   atmosphere,
+  blocks,
+  'core-shaders': coreShaders,
+  entities,
+  environment: environmentCategory,
+  fonts,
+  gui,
+  items,
+  locale,
+  models,
   bloom,
   cartoon,
   challenging,

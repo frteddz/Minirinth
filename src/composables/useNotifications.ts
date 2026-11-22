@@ -6,8 +6,15 @@ import {
   type Notification,
 } from '../api/client'
 import { useNotificationSettings } from './useNotificationSettings'
+import { useSystemNotifications } from './useSystemNotifications'
+import {
+  silentChannelId,
+  soundChannelIds,
+  soundKeyForNotification,
+} from '../utils/notification-sound'
 
-const { playForNotification } = useNotificationSettings()
+const { settings: soundSettings, playForNotification } = useNotificationSettings()
+const { sendIncoming } = useSystemNotifications()
 
 const notifications = ref<Notification[]>([])
 const scopeError = ref(false)
@@ -41,7 +48,15 @@ export function useNotifications() {
       notifications.value = next
       next.forEach((item) => knownIds.add(item.id))
       hasLoaded = true
-      if (fresh.length > 0) playForNotification(newestByDate(fresh))
+      if (fresh.length > 0) {
+        const newest = newestByDate(fresh)
+        playForNotification(newest)
+        const key = soundKeyForNotification(newest)
+        const channelId = soundSettings.value[key].enabled
+          ? soundChannelIds[key]
+          : silentChannelId
+        void sendIncoming(newest.title, newest.text, channelId)
+      }
     } catch (cause) {
       notifications.value = []
       scopeError.value = isScopeError(cause)

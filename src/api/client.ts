@@ -1,6 +1,6 @@
 const API_BASE_URL = 'https://api.modrinth.com/v2'
 const API_V3_BASE_URL = 'https://api.modrinth.com/v3'
-const USER_AGENT = 'Minirynth/0.3.0 (Unofficial mobile port for Modrinth)'
+const USER_AGENT = 'Minirynth/0.4.7 (Unofficial mobile port for Modrinth)'
 const CACHE_PREFIX = 'minirynth.cache.'
 const CACHE_TTL = 10 * 60 * 1000
 
@@ -44,6 +44,19 @@ export function clearApiCache() {
   }
 }
 
+function clearCachePrefix(prefix: string) {
+  try {
+    const keys = Object.keys(localStorage).filter((key) => key.startsWith(CACHE_PREFIX + prefix))
+    keys.forEach((key) => localStorage.removeItem(key))
+  } catch {
+    void 0
+  }
+}
+
+export function clearProjectCache(slugOrId: string) {
+  clearCachePrefix(`project:${slugOrId}`)
+}
+
 // The WebView ignores a User-Agent set from JS, so MainActivity appends the same
 // string to the native WebView agent. This header still covers non-WebView hosts.
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -58,7 +71,18 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   })
 
   if (!response.ok) {
-    throw new Error(`Modrinth API returned ${response.status} for ${path}`)
+    let description = ''
+    try {
+      const body = (await response.json()) as { description?: string; error?: string }
+      description = body.description || body.error || ''
+    } catch {
+      void 0
+    }
+    throw new Error(
+      description
+        ? `Modrinth API returned ${response.status}: ${description}`
+        : `Modrinth API returned ${response.status} for ${path}`,
+    )
   }
 
   if (response.status === 204) return undefined as T
@@ -78,8 +102,21 @@ export async function apiFetchV3<T>(path: string, init: RequestInit = {}): Promi
   })
 
   if (!response.ok) {
-    throw new Error(`Modrinth API returned ${response.status} for ${path}`)
+    let description = ''
+    try {
+      const body = (await response.json()) as { description?: string; error?: string }
+      description = body.description || body.error || ''
+    } catch {
+      void 0
+    }
+    throw new Error(
+      description
+        ? `Modrinth API returned ${response.status}: ${description}`
+        : `Modrinth API returned ${response.status} for ${path}`,
+    )
   }
+
+  if (response.status === 204) return undefined as T
 
   return response.json() as Promise<T>
 }
@@ -139,6 +176,7 @@ export interface GalleryImage {
   description: string | null
   featured: boolean
   created: string
+  ordering?: number
 }
 
 export interface ProjectDetail extends Project {
@@ -164,6 +202,212 @@ export interface ProjectDetail extends Project {
 
 export function getProject(slugOrId: string): Promise<ProjectDetail> {
   return cached(`project:${slugOrId}`, () => apiFetch<ProjectDetail>(`/project/${slugOrId}`))
+}
+
+export interface ProjectEditPayload {
+  title?: string
+  description?: string
+  body?: string
+  categories?: string[]
+  additional_categories?: string[]
+  client_side?: string
+  server_side?: string
+  requested_status?: string | null
+  issues_url?: string | null
+  source_url?: string | null
+  wiki_url?: string | null
+  discord_url?: string | null
+  license_id?: string
+  license_url?: string | null
+  donation_urls?: { id: string; platform: string; url: string }[]
+}
+
+export async function modifyProject(slugOrId: string, payload: ProjectEditPayload): Promise<void> {
+  await apiFetch<void>(`/project/${slugOrId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  clearProjectCache(slugOrId)
+}
+
+export interface CreateProjectInput {
+  title: string
+  slug?: string
+  description: string
+  body: string
+  project_type: string
+  categories: string[]
+  additional_categories: string[]
+  license_id?: string
+  license_url?: string | null
+  issues_url?: string | null
+  source_url?: string | null
+  wiki_url?: string | null
+  discord_url?: string | null
+  client_side: string
+  server_side: string
+  requested_status?: string
+  is_draft: boolean
+  icon?: File | null
+}
+
+export interface CreatedProject {
+  id: string
+  slug?: string | null
+  title: string
+  project_type: string
+}
+
+export async function createProject(input: CreateProjectInput): Promise<CreatedProject> {
+  const { icon, ...data } = input
+  const form = new FormData()
+  form.append('data', JSON.stringify(data))
+  if (icon) form.append('icon', icon, icon.name)
+  const created = await apiFetch<CreatedProject>('/project', { method: 'POST', body: form })
+  clearProjectCache(created.id)
+  return created
+}
+
+export interface GalleryUploadOptions {
+  ext: string
+  featured: boolean
+  title?: string
+  description?: string
+  ordering?: number
+}
+
+export async function addGalleryImage(
+  slugOrId: string,
+  file: File,
+  options: GalleryUploadOptions,
+): Promise<void> {
+  const params = new URLSearchParams()
+  params.set('ext', options.ext)
+  params.set('featured', String(options.featured))
+  if (options.title) params.set('title', options.title)
+  if (options.description) params.set('description', options.description)
+  if (options.ordering !== undefined) params.set('ordering', String(options.ordering))
+  await apiFetch<void>(`/project/${slugOrId}/gallery?${params.toString()}`, {
+    method: 'POST',
+    headers: { 'Content-Type': file.type || `image/${options.ext}` },
+    body: file,
+  })
+  clearProjectCache(slugOrId)
+}
+
+export async function deleteGalleryImage(slugOrId: string, url: string): Promise<void> {
+  const params = new URLSearchParams()
+  params.set('url', url)
+  await apiFetch<void>(`/project/${slugOrId}/gallery?${params.toString()}`, { method: 'DELETE' })
+  clearProjectCache(slugOrId)
+}
+
+export interface OrganizationMember {
+  team_id: string
+  user: {
+    id: string
+    username: string
+    avatar_url: string | null
+  }
+  role: string
+  permissions: number
+  organization_permissions: number
+  accepted: boolean
+}
+
+export interface Organization {
+  id: string
+  slug: string
+  name: string
+  description: string
+  team_id: string
+  icon_url: string | null
+  raw_icon_url?: string | null
+  color: number | null
+  members: OrganizationMember[]
+}
+
+export interface OrganizationEditPayload {
+  name?: string
+  slug?: string
+  description?: string
+}
+
+export function getUserOrganizations(userId: string): Promise<Organization[]> {
+  return apiFetchV3(`/user/${encodeURIComponent(userId)}/organizations`)
+}
+
+export function getOrganization(idOrSlug: string): Promise<Organization> {
+  return apiFetchV3(`/organization/${encodeURIComponent(idOrSlug)}`)
+}
+
+export function getOrganizationProjects(idOrSlug: string): Promise<Project[]> {
+  return apiFetchV3(`/organization/${encodeURIComponent(idOrSlug)}/projects`)
+}
+
+export async function createOrganization(input: OrganizationEditPayload): Promise<Organization> {
+  const created = await apiFetchV3<Organization>('/organization', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  })
+  clearApiCache()
+  return created
+}
+
+export async function modifyOrganization(
+  idOrSlug: string,
+  payload: OrganizationEditPayload,
+): Promise<void> {
+  await apiFetchV3<void>(`/organization/${encodeURIComponent(idOrSlug)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  clearApiCache()
+}
+
+export async function changeOrganizationIcon(idOrSlug: string, file: File): Promise<void> {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
+  await apiFetchV3<void>(
+    `/organization/${encodeURIComponent(idOrSlug)}/icon?ext=${encodeURIComponent(ext)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': file.type || `image/${ext}` },
+      body: file,
+    },
+  )
+  clearApiCache()
+}
+
+export async function deleteOrganizationIcon(idOrSlug: string): Promise<void> {
+  await apiFetchV3<void>(`/organization/${encodeURIComponent(idOrSlug)}/icon`, {
+    method: 'DELETE',
+  })
+  clearApiCache()
+}
+
+export function joinTeam(teamId: string): Promise<void> {
+  return apiFetch<void>(`/team/${encodeURIComponent(teamId)}/join`, { method: 'POST' })
+}
+
+export function leaveTeam(teamId: string, userId: string): Promise<void> {
+  return apiFetch<void>(`/team/${encodeURIComponent(teamId)}/members/${encodeURIComponent(userId)}`, {
+    method: 'DELETE',
+  })
+}
+
+export function addTeamMember(teamId: string, userId: string): Promise<void> {
+  return apiFetch<void>(`/team/${encodeURIComponent(teamId)}/members`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: userId }),
+  })
+}
+
+export function getUserById(idOrUsername: string): Promise<ModrinthUser> {
+  return apiFetch<ModrinthUser>(`/user/${encodeURIComponent(idOrUsername)}`)
 }
 
 export interface ProjectMember {
@@ -192,7 +436,13 @@ export interface ProjectVersion {
   game_versions: string[]
   loaders: string[]
   changelog: string | null
-  files: { name: string; filename: string; url: string; size: number }[]
+  files: {
+    name: string
+    filename: string
+    url: string
+    size: number
+    hashes?: Record<string, string>
+  }[]
 }
 
 export function getProjectVersions(
@@ -202,6 +452,192 @@ export function getProjectVersions(
   return cached(`project:${slugOrId}:versions:${limit}`, () =>
     apiFetch<ProjectVersion[]>(`/project/${slugOrId}/version?limit=${limit}`),
   )
+}
+
+export interface CreateVersionInput {
+  project_id: string
+  name: string
+  version_number: string
+  changelog?: string
+  game_versions: string[]
+  loaders: string[]
+  version_type: string
+  featured: boolean
+  status?: string
+  environment?: string
+  files: File[]
+}
+
+export async function createVersion(input: CreateVersionInput): Promise<ProjectVersion> {
+  const { files, ...metadata } = input
+  const form = new FormData()
+  form.append(
+    'data',
+    JSON.stringify({
+      ...metadata,
+      file_parts: files.map((_, index) => `file${index}`),
+      primary_file: 'file0',
+    }),
+  )
+  files.forEach((file, index) => form.append(`file${index}`, file, file.name))
+  const version = await apiFetch<ProjectVersion>('/version', { method: 'POST', body: form })
+  clearProjectCache(input.project_id)
+  return version
+}
+
+export interface VersionEditPayload {
+  name?: string
+  version_number?: string
+  changelog?: string | null
+  game_versions?: string[]
+  version_type?: string
+  loaders?: string[]
+  featured?: boolean
+  status?: string
+  requested_status?: string | null
+  dependencies?: {
+    version_id?: string | null
+    project_id?: string | null
+    file_name?: string | null
+    dependency_type: 'required' | 'optional' | 'incompatible' | 'embedded'
+  }[]
+}
+
+export async function modifyVersion(id: string, payload: VersionEditPayload): Promise<void> {
+  await apiFetch<void>(`/version/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  clearApiCache()
+}
+
+export async function deleteVersion(id: string): Promise<void> {
+  await apiFetch<void>(`/version/${id}`, { method: 'DELETE' })
+  clearApiCache()
+}
+
+export async function deleteProject(idOrSlug: string): Promise<void> {
+  await apiFetch<void>(`/project/${encodeURIComponent(idOrSlug)}`, { method: 'DELETE' })
+  clearApiCache()
+}
+
+export async function changeProjectIcon(idOrSlug: string, file: File): Promise<void> {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
+  await apiFetch<void>(`/project/${encodeURIComponent(idOrSlug)}/icon?ext=${encodeURIComponent(ext)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': file.type || `image/${ext}` },
+    body: file,
+  })
+  clearProjectCache(idOrSlug)
+}
+
+export async function deleteProjectIcon(idOrSlug: string): Promise<void> {
+  await apiFetch<void>(`/project/${encodeURIComponent(idOrSlug)}/icon`, { method: 'DELETE' })
+  clearProjectCache(idOrSlug)
+}
+
+export interface GalleryEditOptions {
+  url: string
+  featured?: boolean
+  title?: string
+  description?: string
+  ordering?: number
+}
+
+export async function modifyGalleryImage(
+  idOrSlug: string,
+  options: GalleryEditOptions,
+): Promise<void> {
+  const params = new URLSearchParams()
+  params.set('url', options.url)
+  if (options.featured !== undefined) params.set('featured', String(options.featured))
+  if (options.title !== undefined) params.set('title', options.title)
+  if (options.description !== undefined) params.set('description', options.description)
+  if (options.ordering !== undefined) params.set('ordering', String(options.ordering))
+  await apiFetch<void>(`/project/${encodeURIComponent(idOrSlug)}/gallery?${params.toString()}`, {
+    method: 'PATCH',
+  })
+  clearProjectCache(idOrSlug)
+}
+
+export async function addVersionFiles(versionId: string, files: File[]): Promise<void> {
+  const form = new FormData()
+  form.append(
+    'data',
+    JSON.stringify({ file_parts: files.map((_, index) => `file${index}`) }),
+  )
+  files.forEach((file, index) => form.append(`file${index}`, file, file.name))
+  await apiFetch<void>(`/version/${encodeURIComponent(versionId)}/file`, {
+    method: 'POST',
+    body: form,
+  })
+  clearApiCache()
+}
+
+export async function deleteVersionFile(
+  hash: string,
+  versionId: string,
+  algorithm: 'sha1' | 'sha512' = 'sha1',
+): Promise<void> {
+  const params = new URLSearchParams()
+  params.set('algorithm', algorithm)
+  params.set('version_id', versionId)
+  await apiFetch<void>(`/version_file/${encodeURIComponent(hash)}?${params.toString()}`, {
+    method: 'DELETE',
+  })
+  clearApiCache()
+}
+
+export interface TeamMemberEditPayload {
+  role?: string
+  permissions?: number
+  payouts_split?: number
+  ordering?: number
+}
+
+export function modifyTeamMember(
+  teamId: string,
+  userId: string,
+  payload: TeamMemberEditPayload,
+): Promise<void> {
+  return apiFetch<void>(`/team/${encodeURIComponent(teamId)}/members/${encodeURIComponent(userId)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+}
+
+export function transferTeamOwnership(teamId: string, userId: string): Promise<void> {
+  return apiFetch<void>(`/team/${encodeURIComponent(teamId)}/owner`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: userId }),
+  })
+}
+
+export function addProjectToOrganization(orgId: string, projectId: string): Promise<void> {
+  return apiFetchV3<void>(`/organization/${encodeURIComponent(orgId)}/projects`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ project_id: projectId }),
+  })
+}
+
+export async function removeProjectFromOrganization(
+  orgId: string,
+  projectId: string,
+  newOwnerId: string,
+): Promise<void> {
+  await apiFetchV3<void>(
+    `/organization/${encodeURIComponent(orgId)}/projects/${encodeURIComponent(projectId)}`,
+    {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ new_owner: newOwnerId }),
+    },
+  )
+  clearApiCache()
 }
 
 export interface Notification {

@@ -1,12 +1,31 @@
 <script setup lang="ts">
-import { ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, Heart, X } from '@lucide/vue'
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  ExternalLink,
+  Heart,
+  Pencil,
+  Settings,
+  Trash,
+  X,
+} from '@lucide/vue'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Card from '../ui/components/Card.vue'
 import SelectMenu from '../components/SelectMenu.vue'
+import ProjectEditDialog from '../components/ProjectEditDialog.vue'
+import VersionUploadDialog from '../components/VersionUploadDialog.vue'
+import VersionEditDialog from '../components/VersionEditDialog.vue'
+import GalleryUploadDialog from '../components/GalleryUploadDialog.vue'
+import GalleryEditDialog from '../components/GalleryEditDialog.vue'
 import downloadIcon from '../assets/icons/download.svg?raw'
 import heartIcon from '../assets/icons/heart.svg?raw'
 import {
+  deleteGalleryImage,
+  deleteProject,
+  deleteVersion,
   getProject,
   getProjectMembers,
   getProjectVersions,
@@ -39,6 +58,21 @@ const copiedId = ref(false)
 const expandedChangelogs = ref<Record<string, boolean>>({})
 const galleryOpen = ref(false)
 const galleryIndex = ref(0)
+const editOpen = ref(false)
+const uploadOpen = ref(false)
+const galleryUploadOpen = ref(false)
+const editingVersion = ref<ProjectVersion | null>(null)
+const pendingDelete = ref<{
+  kind: 'gallery' | 'version' | 'project'
+  id: string
+  label: string
+} | null>(null)
+const editingGalleryImage = ref<{
+  image: ProjectDetail['gallery'][number]
+  index: number
+} | null>(null)
+const deleting = ref(false)
+const deleteError = ref('')
 let galleryTouchX = 0
 
 function openGallery(index: number) {
@@ -222,6 +256,96 @@ const following = computed(() =>
   project.value ? isFollowing(project.value.id) : false,
 )
 
+const canEdit = computed(() => {
+  if (!user.value) return false
+  const editableRoles = ['Owner', 'Admin', 'Moderator']
+  return members.value.some(
+    (member) =>
+      member.user.id === user.value?.id &&
+      member.accepted &&
+      editableRoles.includes(member.role),
+  )
+})
+
+function openEdit() {
+  editOpen.value = true
+}
+
+function openUpload() {
+  uploadOpen.value = true
+}
+
+function openGalleryUpload() {
+  galleryUploadOpen.value = true
+}
+
+function editVersion(version: ProjectVersion) {
+  editingVersion.value = version
+}
+
+function requestGalleryDelete(image: ProjectDetail['gallery'][number]) {
+  pendingDelete.value = {
+    kind: 'gallery',
+    id: image.url,
+    label: image.title || 'this image',
+  }
+}
+
+function editGalleryImage(image: ProjectDetail['gallery'][number], index: number) {
+  editingGalleryImage.value = { image, index }
+}
+
+function requestProjectDelete() {
+  if (!project.value) return
+  pendingDelete.value = {
+    kind: 'project',
+    id: project.value.id,
+    label: project.value.title,
+  }
+}
+
+function requestVersionDelete(version: ProjectVersion) {
+  pendingDelete.value = {
+    kind: 'version',
+    id: version.id,
+    label: version.version_number,
+  }
+}
+
+function closeDelete() {
+  if (!deleting.value) pendingDelete.value = null
+}
+
+async function confirmDelete() {
+  const target = pendingDelete.value
+  if (!target || !project.value) return
+  deleting.value = true
+  deleteError.value = ''
+  try {
+    if (target.kind === 'gallery') {
+      await deleteGalleryImage(project.value.id, target.id)
+    } else if (target.kind === 'project') {
+      await deleteProject(target.id)
+      pendingDelete.value = null
+      router.push('/dashboard')
+      return
+    } else {
+      await deleteVersion(target.id)
+    }
+    pendingDelete.value = null
+    await load()
+  } catch (cause) {
+    deleteError.value = cause instanceof Error ? cause.message : 'Could not delete this item.'
+  } finally {
+    deleting.value = false
+  }
+}
+
+async function onProjectSaved() {
+  editOpen.value = false
+  await load()
+}
+
 function followAction() {
   if (!user.value) {
     router.push('/login')
@@ -279,6 +403,12 @@ async function load() {
   members.value = []
   tab.value = 'about'
   downloadOpen.value = false
+  editOpen.value = false
+  uploadOpen.value = false
+  galleryUploadOpen.value = false
+  editingVersion.value = null
+  editingGalleryImage.value = null
+  pendingDelete.value = null
   selectedGameVersion.value = ''
   selectedLoader.value = ''
   expandedChangelogs.value = {}
@@ -341,19 +471,44 @@ onMounted(load)
           </div>
         </div>
         <div class="project-page__actions">
-          <button
-            type="button"
-            class="project-page__follow"
-            :class="{ 'is-following': following }"
-            :aria-label="!user ? 'Sign in to follow' : following ? 'Unfollow project' : 'Follow project'"
-            @click="followAction"
-          >
-            <Heart :size="18" :stroke-width="2.5" :fill="following ? 'currentColor' : 'none'" />
-          </button>
-          <button type="button" class="project-page__download" @click="openDownload">
-            <span class="project-page__action-icon" aria-hidden="true" v-html="downloadIcon"></span>
-            Download
-          </button>
+          <template v-if="canEdit">
+            <button type="button" class="project-page__edit" @click="openEdit">
+              <Settings :size="18" :stroke-width="2.5" />
+              Edit project
+            </button>
+            <button
+              type="button"
+              class="project-page__follow"
+              aria-label="Download"
+              @click="openDownload"
+            >
+              <Download :size="18" :stroke-width="2.5" />
+            </button>
+            <button
+              type="button"
+              class="project-page__follow"
+              :class="{ 'is-following': following }"
+              :aria-label="following ? 'Unfollow project' : 'Follow project'"
+              @click="followAction"
+            >
+              <Heart :size="18" :stroke-width="2.5" :fill="following ? 'currentColor' : 'none'" />
+            </button>
+          </template>
+          <template v-else>
+            <button type="button" class="project-page__download" @click="openDownload">
+              <span class="project-page__action-icon" aria-hidden="true" v-html="downloadIcon"></span>
+              Download
+            </button>
+            <button
+              type="button"
+              class="project-page__follow"
+              :class="{ 'is-following': following }"
+              :aria-label="!user ? 'Sign in to follow' : following ? 'Unfollow project' : 'Follow project'"
+              @click="followAction"
+            >
+              <Heart :size="18" :stroke-width="2.5" :fill="following ? 'currentColor' : 'none'" />
+            </button>
+          </template>
         </div>
       </header>
 
@@ -395,11 +550,29 @@ onMounted(load)
       </div>
 
       <div v-else-if="tab === 'versions'">
+        <button v-if="canEdit" type="button" class="project-page__upload" @click="openUpload">
+          Upload version
+        </button>
         <Card v-for="version in versions" :key="version.id" class="version-card">
           <template #header>
             <div class="version-card__heading">
-              <h2 class="version-card__title">{{ version.name }}</h2>
-              <span class="version-card__number">{{ version.version_number }}</span>
+              <div class="version-card__title-wrap">
+                <h2 class="version-card__title">{{ version.name }}</h2>
+                <span class="version-card__number">{{ version.version_number }}</span>
+              </div>
+              <div v-if="canEdit" class="version-card__manage">
+                <button type="button" aria-label="Edit version" @click="editVersion(version)">
+                  <Pencil :size="18" :stroke-width="2.2" />
+                </button>
+                <button
+                  type="button"
+                  class="is-danger"
+                  aria-label="Delete version"
+                  @click="requestVersionDelete(version)"
+                >
+                  <Trash :size="18" :stroke-width="2.2" />
+                </button>
+              </div>
             </div>
           </template>
           <p class="version-card__meta">
@@ -425,42 +598,71 @@ onMounted(load)
           >
             {{ expandedChangelogs[version.id] ? 'Show less' : 'Show more' }}
           </button>
-          <a
-            v-if="version.files[0]"
-            class="version-card__download"
-            :href="version.files[0].url"
-            target="_blank"
-            rel="noopener"
-          >
-            <span class="project-page__action-icon" aria-hidden="true" v-html="downloadIcon"></span>
-            Download {{ version.files[0].filename }}
-          </a>
-          <a
-            class="version-card__link"
-            :href="`https://modrinth.com/project/${project.slug}/version/${version.id}`"
-            target="_blank"
-            rel="noopener"
-          >
-            Open on Modrinth
-            <ExternalLink :size="14" :stroke-width="2" />
-          </a>
+          <div class="version-card__footer">
+            <a
+              v-if="version.files[0]"
+              class="version-card__download"
+              :href="version.files[0].url"
+              target="_blank"
+              rel="noopener"
+            >
+              <Download :size="18" :stroke-width="2.2" />
+              <span class="version-card__filename">{{ version.files[0].filename }}</span>
+            </a>
+            <a
+              class="version-card__link"
+              :href="`https://modrinth.com/project/${project.slug}/version/${version.id}`"
+              target="_blank"
+              rel="noopener"
+              aria-label="Open on Modrinth"
+            >
+              <ExternalLink :size="18" :stroke-width="2.2" />
+            </a>
+          </div>
         </Card>
         <p v-if="versions.length === 0" class="project-page__message">No versions found.</p>
       </div>
 
       <div v-else-if="tab === 'gallery'">
+        <button v-if="canEdit" type="button" class="project-page__upload" @click="openGalleryUpload">
+          Add image
+        </button>
         <p v-if="project.gallery.length === 0" class="project-page__message">No gallery images.</p>
         <Card v-for="(image, index) in project.gallery" :key="index" class="gallery-card">
-          <button
-            type="button"
-            class="gallery-card__open"
-            :aria-label="`View ${image.title ?? project.title}`"
-            @click="openGallery(index)"
-          >
-            <img class="gallery-card__image" :src="image.url" :alt="image.title ?? project.title" />
-          </button>
-          <h2 v-if="image.title" class="gallery-card__title">{{ image.title }}</h2>
-          <p v-if="image.description" class="gallery-card__description">{{ image.description }}</p>
+          <div class="gallery-card__media">
+            <button
+              type="button"
+              class="gallery-card__open"
+              :aria-label="`View ${image.title ?? project.title}`"
+              @click="openGallery(index)"
+            >
+              <img class="gallery-card__image" :src="image.url" :alt="image.title ?? project.title" />
+            </button>
+            <div v-if="canEdit" class="gallery-card__tools">
+              <button
+                type="button"
+                class="gallery-card__edit"
+                aria-label="Edit image"
+                @click="editGalleryImage(image, index)"
+              >
+                <Pencil :size="20" :stroke-width="2.2" />
+              </button>
+              <button
+                type="button"
+                class="gallery-card__delete"
+                aria-label="Delete image"
+                @click="requestGalleryDelete(image)"
+              >
+                <Trash :size="20" :stroke-width="2.2" />
+              </button>
+            </div>
+            <div v-if="image.title || image.description" class="gallery-card__caption">
+              <h2 v-if="image.title" class="gallery-card__title">{{ image.title }}</h2>
+              <p v-if="image.description" class="gallery-card__description">
+                {{ image.description }}
+              </p>
+            </div>
+          </div>
         </Card>
       </div>
 
@@ -559,6 +761,15 @@ onMounted(load)
             <ExternalLink :size="16" :stroke-width="2" class="link-card__external" />
           </a>
         </Card>
+        <button
+          v-if="canEdit"
+          type="button"
+          class="project-page__delete"
+          @click="requestProjectDelete"
+        >
+          <Trash :size="18" :stroke-width="2.2" />
+          Delete project
+        </button>
       </div>
     </template>
 
@@ -580,7 +791,7 @@ onMounted(load)
                 <h2>Download {{ project?.title }}</h2>
               </div>
               <button type="button" aria-label="Close download" @click="downloadOpen = false">
-                <X :size="20" :stroke-width="2.5" />
+                <X :size="24" :stroke-width="2.5" />
               </button>
             </header>
 
@@ -680,6 +891,65 @@ onMounted(load)
           >
             <ChevronRight :size="24" :stroke-width="2.5" />
           </button>
+        </div>
+      </div>
+    </Teleport>
+
+    <ProjectEditDialog
+      v-if="editOpen && project"
+      :project="project"
+      @close="editOpen = false"
+      @saved="onProjectSaved"
+    />
+
+    <VersionUploadDialog
+      v-if="uploadOpen && project"
+      :project="project"
+      @close="uploadOpen = false"
+      @uploaded="onProjectSaved"
+    />
+
+    <GalleryUploadDialog
+      v-if="galleryUploadOpen && project"
+      :project="project"
+      @close="galleryUploadOpen = false"
+      @uploaded="onProjectSaved"
+    />
+
+    <GalleryEditDialog
+      v-if="editingGalleryImage && project"
+      :project="project"
+      :image="editingGalleryImage.image"
+      :index="editingGalleryImage.index"
+      @close="editingGalleryImage = null"
+      @saved="onProjectSaved"
+    />
+
+    <VersionEditDialog
+      v-if="editingVersion"
+      :version="editingVersion"
+      @close="editingVersion = null"
+      @saved="onProjectSaved"
+    />
+
+    <Teleport to="body">
+      <div
+        v-if="pendingDelete"
+        class="overlay confirm-overlay"
+        @click.self="closeDelete"
+      >
+        <div class="confirm-card" role="dialog" aria-modal="true" aria-label="Confirm delete">
+          <h2 class="confirm-card__title">Delete {{ pendingDelete.label }}?</h2>
+          <p class="confirm-card__text">This can't be undone.</p>
+          <p v-if="deleteError" class="confirm-card__text">{{ deleteError }}</p>
+          <div class="confirm-card__actions">
+            <button type="button" class="confirm-card__cancel" :disabled="deleting" @click="closeDelete">
+              Cancel
+            </button>
+            <button type="button" class="confirm-card__confirm" :disabled="deleting" @click="confirmDelete">
+              {{ deleting ? 'Deleting...' : 'Delete' }}
+            </button>
+          </div>
         </div>
       </div>
     </Teleport>

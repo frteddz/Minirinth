@@ -11,6 +11,9 @@ import NotificationsView from '../views/NotificationsView.vue'
 import UserView from '../views/UserView.vue'
 import OAuthCallbackView from '../views/OAuthCallbackView.vue'
 import CreditsView from '../views/CreditsView.vue'
+import CreateProjectView from '../views/CreateProjectView.vue'
+import OrganizationsView from '../views/OrganizationsView.vue'
+import OrganizationView from '../views/OrganizationView.vue'
 import ProjectView from '../views/ProjectView.vue'
 
 const router = createRouter({
@@ -27,6 +30,9 @@ const router = createRouter({
     { path: '/dashboard', name: 'dashboard', component: DashboardView },
     { path: '/analytics', name: 'analytics', component: AnalyticsView },
     { path: '/credits', name: 'credits', component: CreditsView },
+    { path: '/create', name: 'create-project', component: CreateProjectView },
+    { path: '/organizations', name: 'organizations', component: OrganizationsView },
+    { path: '/organization/:slug', name: 'organization', component: OrganizationView },
     { path: '/mod/:slug', name: 'project-mod', component: ProjectView, meta: { project: true } },
     { path: '/shader/:slug', name: 'project-shader', component: ProjectView, meta: { project: true } },
     {

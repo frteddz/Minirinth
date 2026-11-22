@@ -99,6 +99,12 @@ onMounted(load)
             aria-label="Search projects"
           />
           <SelectMenu v-model="sort" :options="sortOptions" prefix="Sort by" />
+          <button type="button" class="creator__action" @click="router.push('/organizations')">
+            Organizations
+          </button>
+          <button type="button" class="creator__action" @click="router.push('/create')">
+            New project
+          </button>
           <button type="button" class="creator__action" @click="refresh">Refresh</button>
         </div>
 

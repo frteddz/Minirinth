@@ -12,7 +12,7 @@ public class MainActivity extends BridgeActivity {
 
         WebSettings settings = getBridge().getWebView().getSettings();
         settings.setUserAgentString(
-            settings.getUserAgentString() + " Minirynth/0.3.0 (Unofficial mobile port for Modrinth)"
+            settings.getUserAgentString() + " Minirynth/0.4.7 (Unofficial mobile port for Modrinth)"
         );
     }
 }

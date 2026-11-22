@@ -1,12 +1,23 @@
 <script setup lang="ts">
+import { onUnmounted, ref, watch } from 'vue'
 import Card from '../ui/components/Card.vue'
-import packageInfo from '../../package.json'
 import { useTheme } from '../composables/useTheme'
 import { useNotificationSettings } from '../composables/useNotificationSettings'
-import type { NotificationSoundId } from '../utils/notification-sound'
+import { useSystemNotifications } from '../composables/useSystemNotifications'
+import {
+  silentChannelId,
+  soundChannelIds,
+  type NotificationSoundId,
+} from '../utils/notification-sound'
 
 const { themes, theme, setTheme } = useTheme()
-const version = `${packageInfo.version}-dev The Creators Update`
+const { requestPermission, sendTest, sendDelayedTest, syncBackgroundChannels } =
+  useSystemNotifications()
+const notificationPermission = ref('')
+const timedTestSeconds = ref(0)
+let timedTestTimer: ReturnType<typeof setInterval> | undefined
+
+const version = '0.4.7-dev The Creator Tools Update'
 const {
   settings: soundSettings,
   soundOptions,
@@ -18,9 +29,54 @@ const {
   reset: resetSounds,
 } = useNotificationSettings()
 
+watch(
+  soundSettings,
+  () => {
+    const channels = {} as Record<NotificationSoundId, string>
+    for (const option of soundOptions) {
+      channels[option.id] = soundSettings.value[option.id].enabled
+        ? soundChannelIds[option.id]
+        : silentChannelId
+    }
+    syncBackgroundChannels(channels)
+  },
+  { deep: true, immediate: true },
+)
+
 function onVolumeInput(id: NotificationSoundId, event: Event) {
   setVolume(id, Number((event.target as HTMLInputElement).value))
 }
+
+async function enableNotifications() {
+  const granted = await requestPermission()
+  notificationPermission.value = granted ? 'Notifications enabled' : 'Permission denied'
+}
+
+function testNotification() {
+  void sendTest()
+}
+
+function onTestSound(id: NotificationSoundId) {
+  playTest(id)
+  testNotification()
+}
+
+function startTimedTest() {
+  if (timedTestSeconds.value > 0) return
+  void sendDelayedTest()
+  timedTestSeconds.value = 5
+  timedTestTimer = setInterval(() => {
+    timedTestSeconds.value -= 1
+    if (timedTestSeconds.value <= 0 && timedTestTimer) {
+      clearInterval(timedTestTimer)
+      timedTestTimer = undefined
+    }
+  }, 1000)
+}
+
+onUnmounted(() => {
+  if (timedTestTimer) clearInterval(timedTestTimer)
+})
 </script>
 
 <template>
@@ -74,6 +130,18 @@ function onVolumeInput(id: NotificationSoundId, event: Event) {
       <div class="settings__section">
         <h2 class="settings__heading">Notifications</h2>
         <p class="settings__hint">Turn sounds on or off and set how loud each one plays.</p>
+        <button type="button" class="settings__enable" @click="enableNotifications">
+          Enable notifications
+        </button>
+        <p v-if="notificationPermission" class="settings__hint">{{ notificationPermission }}</p>
+        <button
+          type="button"
+          class="settings__enable"
+          :disabled="timedTestSeconds > 0"
+          @click="startTimedTest"
+        >
+          {{ timedTestSeconds > 0 ? `Notification in ${timedTestSeconds}s` : 'Test notification in 5s' }}
+        </button>
 
         <div class="settings__sounds">
           <div v-for="option in soundOptions" :key="option.id" class="settings__sound">
@@ -115,7 +183,7 @@ function onVolumeInput(id: NotificationSoundId, event: Event) {
                 type="button"
                 class="settings__test"
                 :disabled="!soundSettings[option.id].enabled || testing[option.id]"
-                @click="playTest(option.id)"
+                @click="onTestSound(option.id)"
               >
                 {{ testing[option.id] ? 'Wait' : 'Test' }}
               </button>

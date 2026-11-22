@@ -260,7 +260,7 @@ onMounted(restore)
     </template>
 
     <p class="page__footer">
-      <span class="app-version">0.3.0-dev The Creators Update</span>
+      <span class="app-version">0.4.7-dev The Creator Tools Update</span>
       Powered by the <a href="https://modrinth.com" target="_blank" rel="noopener">Modrinth API</a>.
     </p>
 
