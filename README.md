@@ -35,10 +35,8 @@ Current build: v0.2.1-dev.
 
 ## Screenshots
 
-![Home](docs/screenshots/home.png)
-![Browse](docs/screenshots/browse.png)
-![Filters](docs/screenshots/filters.png)
-![Profile](docs/screenshots/profile.png)
+![Grid-1](docs/screenshots/grid-1.png)
+![Grid-2](docs/screenshots/grid-2.png)
 
 ## Running it (for devs)
 
