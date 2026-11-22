@@ -11,7 +11,7 @@ Current build: v0.4.7-dev.
 ## Contents
 
 - [What works now](#what-works-now)
-- [Coming later](#coming-later)
+- [Coming soon](#coming-soon)
 - [Screenshots](#screenshots)
 - [Running it](#running-it)
 - [Releases](#releases)
@@ -34,8 +34,9 @@ Current build: v0.4.7-dev.
 - Eight themes and per-sound notification volume controls.
 - A floating dock that hides when you scroll down and returns when you scroll up.
 
-## Coming later
+## Coming soon
 
+- Adding mods to your Modrinth instance from the phone. This one will be big and hard, so it is a later thing.
 - Scheduling releases, collections, content disclosures and payouts.
 - More to come i just don't know what..
 
