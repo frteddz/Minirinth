@@ -15,6 +15,8 @@ The 0.4.x and 0.5.x builds are still for testing. 0.4.0 has not shipped.
 
 - Manage content viewer shows project icons for files downloaded through Minirynth, with a letter fallback for the rest.
 - Settings version label now reads from `package.json` like the profile footer, and the API User-Agent matches the build.
+- Coming soon list now reflects the folder features that already shipped.
+- Added Ko-fi, Modrinth, repo and CurseForge links to the dev site footer.
 
 ## 0.5.3-dev The Anywhere Update - 2026-11-23
 

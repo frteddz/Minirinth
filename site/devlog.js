@@ -13,7 +13,9 @@ export const devlog = [
         "title": "Improved",
         "items": [
           "Manage content viewer shows project icons for files downloaded through Minirynth, with a letter fallback for the rest.",
-          "Settings version label now reads from `package.json` like the profile footer, and the API User-Agent matches the build."
+          "Settings version label now reads from `package.json` like the profile footer, and the API User-Agent matches the build.",
+          "Coming soon list now reflects the folder features that already shipped.",
+          "Added Ko-fi, Modrinth, repo and CurseForge links to the dev site footer."
         ]
       }
     ]
@@ -348,8 +350,8 @@ export const devlog = [
 ]
 
 export const roadmap = [
-  "Adding mods, resource packs, data packs, and so on to your Modrinth instance from Minirynth where ever you are. for example: you are having a vacation on a beach in Hawaii and for a random reason a thought popped in your head that you wanna add a mod to your Modrinth instance but you can't since your miles away from your pc, so you download Minirynth and just by a couple clicks of a button (i hope so) the mod is automatically added to your Modrinth instance. soo yea.. this one will be big and difficult (as far as i know), so this will be later on. (There is no specific date for this yet)",
-  "Working with mobile Minecraft launchers like Mojo, so Minirynth can add things straight to the instance you actually play on. I want to support as many mobile launchers as I can, but I'm not promising a specific list or date yet.",
+  "Deeper support for mobile Minecraft launchers like Mojo. The Android folder picker works now, but I want to support as many launchers as I can, so I'm not promising a specific list or date yet.",
+  "Official cloud sync for instances, if Modrinth ever exposes the API for it.",
   "Managing servers from your phone. Adding mods, updating packs and keeping everything in sync while you are away from your pc. This is the one I want most, honestly.",
   "Content disclosures and payouts.",
   "More to come i just don't know what.."

@@ -544,6 +544,25 @@ code {
   margin: 0 auto;
 }
 
+.site-footer__icons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.site-footer__icons a {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+}
+
+.site-footer__icons img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 @media (max-width: 640px) {
   .site-header {
     padding: 14px 20px;
