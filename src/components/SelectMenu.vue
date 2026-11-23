@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Check, Search } from '@lucide/vue'
-import { computed, nextTick, onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import ChevronIcon from './ChevronIcon.vue'
 
 const props = defineProps<{
@@ -57,9 +57,10 @@ function toggle() {
   query.value = ''
   open.value = true
   window.addEventListener('pointerdown', onOutside, true)
-  if (props.searchable) {
-    nextTick(() => searchInput.value?.focus())
-  }
+}
+
+function onSearchEnter() {
+  searchInput.value?.blur()
 }
 
 function choose(option: string | number) {
@@ -101,6 +102,8 @@ onUnmounted(close)
             type="search"
             placeholder="Search..."
             aria-label="Search options"
+            enterkeyhint="done"
+            @keydown.enter.prevent="onSearchEnter"
           />
         </label>
         <button

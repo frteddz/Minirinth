@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { Ban, Check } from '@lucide/vue'
 import { useCategoryFilters, type SelectionGroup } from '../composables/useCategoryFilters'
 import { tagIconSvg } from '../data/tag-icons'
@@ -9,9 +10,16 @@ const props = withDefaults(
     value: string
     allowExclude?: boolean
     icon?: string
+    boldPrefix?: boolean
   }>(),
-  { allowExclude: true, icon: undefined },
+  { allowExclude: true, icon: undefined, boldPrefix: false },
 )
+
+const labelParts = computed(() => {
+  if (!props.boldPrefix) return null
+  const match = /^(\d+x)(.*)$/.exec(props.value)
+  return match ? { strong: match[1], rest: match[2] } : null
+})
 
 const { toggleSelection, selectionOf } = useCategoryFilters()
 </script>
@@ -24,7 +32,12 @@ const { toggleSelection, selectionOf } = useCategoryFilters()
       aria-hidden="true"
       v-html="tagIconSvg(props.icon)"
     ></span>
-    <span class="filter-option__label">{{ props.value }}</span>
+    <span class="filter-option__label">
+      <template v-if="labelParts">
+        <strong>{{ labelParts.strong }}</strong>{{ labelParts.rest }}
+      </template>
+      <template v-else>{{ props.value }}</template>
+    </span>
     <button
       type="button"
       class="filter-option__action"

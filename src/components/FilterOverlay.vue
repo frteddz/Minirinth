@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Ban, Check, X } from '@lucide/vue'
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import FilterOptionRow from './FilterOptionRow.vue'
 import FilterSection from './FilterSection.vue'
@@ -27,6 +27,7 @@ import {
   specialVersions,
 } from '../data/categories'
 import { useCategoryFilters } from '../composables/useCategoryFilters'
+import { getGameVersions, type GameVersionTag } from '../api/client'
 import { tagIconSvg } from '../data/tag-icons'
 import infoIcon from '../assets/icons/info.svg?raw'
 
@@ -71,10 +72,45 @@ const visibleLoaders = computed(() => {
   return state.showAllLoaders ? allLoaders : primaryLoaders
 })
 
+const gameVersionTags = ref<GameVersionTag[]>([])
+
+onMounted(() => {
+  void getGameVersions()
+    .then((tags) => {
+      gameVersionTags.value = tags
+    })
+    .catch(() => {
+      void 0
+    })
+})
+
+function isDataPackVersion(version: string) {
+  const match = /^(\d+)\.(\d+)/.exec(version)
+  if (!match) return false
+  const major = Number(match[1])
+  const minor = Number(match[2])
+  return major > 1 || (major === 1 && minor >= 13)
+}
+
 const visibleVersions = computed(() => {
   const term = state.versionQuery.trim().toLowerCase()
-  const base = isDataPack.value ? dataPackReleases : releases
-  const extras = isDataPack.value ? dataPackSpecialVersions : specialVersions
+  let base: string[]
+  let extras: string[]
+
+  if (gameVersionTags.value.length) {
+    const releaseVersions = gameVersionTags.value
+      .filter((tag) => tag.version_type === 'release')
+      .map((tag) => tag.version)
+    const otherVersions = gameVersionTags.value
+      .filter((tag) => tag.version_type !== 'release')
+      .map((tag) => tag.version)
+    base = isDataPack.value ? releaseVersions.filter(isDataPackVersion) : releaseVersions
+    extras = isDataPack.value ? otherVersions.filter(isDataPackVersion) : otherVersions
+  } else {
+    base = isDataPack.value ? dataPackReleases : releases
+    extras = isDataPack.value ? dataPackSpecialVersions : specialVersions
+  }
+
   const list = state.showAllVersions ? [...base, ...extras] : base
   return list.filter((version) => version.toLowerCase().includes(term))
 })
@@ -186,7 +222,7 @@ const visibleDependencies = computed(() => {
               :key="item"
               group="resolution"
               :value="item"
-              :icon="item"
+              bold-prefix
             />
           </FilterSection>
 
