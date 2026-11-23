@@ -12,7 +12,6 @@ Current build: v0.5.4-dev The Anywhere Update.
 
 - [What works now](#what-works-now)
 - [Coming soon](#coming-soon)
-- [Screenshots](#screenshots)
 - [Running it](#running-it)
 - [Releases](#releases)
 - [Links](#links)
@@ -44,11 +43,6 @@ Current build: v0.5.4-dev The Anywhere Update.
 - Managing servers from your phone. Adding mods, updating packs and keeping everything in sync while you are away from your pc. This is the one I want most, honestly.
 - Content disclosures and payouts.
 - More to come i just don't know what..
-
-## Screenshots
-
-![grid-2-fix](docs/screenshots/grid-2-fix.png)
-![grid-1](docs/screenshots/grid-1.png)
 
 ## Running it (for devs)
 
