@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Minirynth - development</title>
+    <meta
+      name="description"
+      content="Development updates for Minirynth, an unofficial mobile client for Modrinth."
+    />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="#devlog">Devlog</a>
+        <a href="#roadmap">Roadmap</a>
+        <a href="#updates">Updates</a>
+        <a href="https://github.com/frteddz/Minirynth/releases">APKs</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Unofficial mobile client for Modrinth</p>
+        <h1>Development, in the open.</h1>
+        <p class="hero-copy">
+          Minirynth is built in small releases. This is where every change lands, what is next,
+          and how to get the test builds.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="#devlog">Read the devlog</a>
+          <a class="button" href="https://github.com/frteddz/Minirynth/releases">Get the latest APK</a>
+        </div>
+        <p class="build">Current build: <strong>0.4.7-dev</strong></p>
+      </section>
+
+      <section class="section" id="devlog">
+        <div class="section-head">
+          <h2>Devlog</h2>
+          <p>Every versioned change, straight from the repo.</p>
+        </div>
+        <div class="entries" id="devlog-list"></div>
+      </section>
+
+      <section class="section alt" id="roadmap">
+        <div class="section-head">
+          <h2>Coming soon</h2>
+          <p>What is next. Not a contract, just the direction.</p>
+        </div>
+        <ul class="roadmap-list" id="roadmap-list"></ul>
+        <div class="roadmap-cta">
+          <p>Got an idea for what should come next? Tell me about it.</p>
+          <a
+            class="button"
+            href="https://github.com/frteddz/Minirynth/issues/new?title=%5BIdea%5D%20&body=What%20should%20Minirynth%20do%3F%0A%0AHow%20would%20you%20use%20it%3F%0A%0AAnything%20else%3F"
+            target="_blank"
+            rel="noreferrer"
+            >Send an idea</a
+          >
+        </div>
+      </section>
+
+      <section class="section" id="updates">
+        <div class="section-head">
+          <h2>Get updates</h2>
+          <p>One email when a release ships. No noise in between.</p>
+        </div>
+        <form
+          class="subscribe-form"
+          action="https://buttondown.com/api/emails/embed-subscribe/minirynth"
+          method="post"
+          target="_blank"
+        >
+          <label for="bd-email">Email address</label>
+          <div class="subscribe-row">
+            <input
+              type="email"
+              name="email"
+              id="bd-email"
+              placeholder="you@example.com"
+              required
+            />
+            <button type="submit">Subscribe</button>
+          </div>
+          <input type="hidden" name="embed" value="1" />
+          <p class="subscribe-note">Email only. Double opt-in. Unsubscribe anytime.</p>
+          <p class="subscribe-credit">
+            <a
+              href="https://buttondown.com/refer/minirynth"
+              target="_blank"
+              rel="noreferrer"
+              >Powered by Buttondown.</a
+            >
+          </p>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>
+        Minirynth is an unofficial mobile client for Modrinth. Powered by the
+        <a href="https://modrinth.com">Modrinth API</a>. Not affiliated with Modrinth.
+      </p>
+    </footer>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

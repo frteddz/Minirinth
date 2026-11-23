@@ -37,6 +37,8 @@ Current build: v0.4.7-dev.
 ## Coming soon
 
 - Adding mods, resource packs, data packs, and so on to your Modrinth instance from Minirynth where ever you are. for example: you are having a vacation on a beach in Hawaii and for a random reason a thought popped in your head that you wanna add a mod to your Modrinth instance but you can't since your miles away from your pc, so you download Minirynth and just by a couple clicks of a button (i hope so) the mod is automatically added to your Modrinth instance. soo yea.. this one will be big and difficult (as far as i know), so this will be later on. (There is no specific date for this yet)
+- Working with mobile Minecraft launchers like Mojo, so Minirynth can add things straight to the instance you actually play on. I want to support as many mobile launchers as I can, but I'm not promising a specific list or date yet.
+- Managing servers from your phone. Adding mods, updating packs and keeping everything in sync while you are away from your pc. This is the one I want most, honestly.
 - Scheduling releases, collections, content disclosures and payouts.
 - More to come i just don't know what..
 

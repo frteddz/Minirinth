@@ -8,6 +8,7 @@
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
+    "build:site": "node scripts/build-site.mjs",
     "cap:sync": "cap sync android"
   },
   "dependencies": {
