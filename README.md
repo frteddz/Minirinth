@@ -15,6 +15,7 @@ Current build: v0.4.7-dev.
 - [Screenshots](#screenshots)
 - [Running it](#running-it)
 - [Releases](#releases)
+- [Links](#links)
 - [Licensing](#licensing)
 
 ## What works now
@@ -65,6 +66,18 @@ The Android project lives in `android/`. A debug build needs JDK 21 and Android 
 ## Releases
 
 Prebuilt Android APKs are on the [releases page](https://github.com/frteddz/Minirynth/releases).
+
+
+## Links
+
+<div align="center">
+
+[![Ko-fi](https://raw.githubusercontent.com/frteddz/pixel-icons-library-/main/96x/kofi_icon_bg.png)](https://ko-fi.com/majdsafi)
+[![Modrinth](https://raw.githubusercontent.com/frteddz/pixel-icons-library-/main/96x/modrinth_icon_bg.png)](https://modrinth.com/user/teddz)
+[![Github](https://raw.githubusercontent.com/frteddz/pixel-icons-library-/main/96x/github_icon_bg.png)](https://github.com/frteddz)
+[![CurseForge](https://raw.githubusercontent.com/frteddz/pixel-icons-library-/main/96x/cruseforge_icon_bg.png)](https://www.curseforge.com/members/teddz/)
+
+</div>
 
 ## Licensing
 
