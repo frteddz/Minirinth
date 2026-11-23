@@ -33,7 +33,7 @@
           <a class="button primary" href="#devlog">Read the devlog</a>
           <a class="button" href="https://github.com/frteddz/Minirynth/releases">Get the latest APK</a>
         </div>
-        <p class="build">Current build: <strong>0.4.7-dev</strong></p>
+        <p class="build">Current build: <strong>0.5.4-dev The Anywhere Update</strong></p>
       </section>
 
       <section class="section" id="devlog">
@@ -41,13 +41,33 @@
           <h2>Devlog</h2>
           <p>Every versioned change, straight from the repo.</p>
         </div>
+        <div class="devlog-tools">
+          <input
+            id="devlog-search"
+            class="devlog-search"
+            type="search"
+            placeholder="Search the devlog"
+            aria-label="Search the devlog"
+          />
+          <div class="devlog-filter">
+            <button
+              id="devlog-filter-button"
+              class="devlog-filter__button"
+              type="button"
+              aria-expanded="false"
+            >
+              Filter <span id="devlog-filter-label">All</span>
+            </button>
+            <div class="devlog-filter__menu" id="devlog-filter-menu" hidden></div>
+          </div>
+        </div>
         <div class="entries" id="devlog-list"></div>
       </section>
 
       <section class="section alt" id="roadmap">
         <div class="section-head">
           <h2>Coming soon</h2>
-          <p>What is next. Not a contract, just the direction.</p>
+          <p>What is next.</p>
         </div>
         <ul class="roadmap-list" id="roadmap-list"></ul>
         <div class="roadmap-cta">
@@ -65,7 +85,7 @@
       <section class="section" id="updates">
         <div class="section-head">
           <h2>Get updates</h2>
-          <p>One email when a release ships. No noise in between.</p>
+          <p>One email when a release ships.</p>
         </div>
         <form
           class="subscribe-form"

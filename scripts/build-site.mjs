@@ -34,7 +34,7 @@ function parseDevlog(markdown) {
       return {
         version: version.trim(),
         date: dateParts.join(' - ').trim(),
-        groups,
+        groups: groups.filter((group) => group.title.toLowerCase() !== 'note'),
       }
     })
     .filter((entry) => entry.version && entry.groups.length)
@@ -51,10 +51,19 @@ function parseRoadmap(markdown) {
 
 const devlog = parseDevlog(read('CHANGELOG.md'))
 const roadmap = parseRoadmap(read('README.md'))
+const pkg = JSON.parse(read('package.json'))
 
 writeFileSync(
   new URL('devlog.js', out),
   `export const devlog = ${JSON.stringify(devlog, null, 2)}\n\nexport const roadmap = ${JSON.stringify(roadmap, null, 2)}\n`
+)
+
+writeFileSync(
+  new URL('index.html', out),
+  read('site/index.html').replace(
+    /(<p class="build">Current build: <strong>)[^<]+(<\/strong><\/p>)/,
+    `$1${pkg.displayVersion}$2`,
+  ),
 )
 
 copyFileSync(new URL('assets/minirynth/svg/minirynth-lockup.svg', root), new URL('logo.svg', out))
