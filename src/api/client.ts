@@ -1,6 +1,6 @@
 const API_BASE_URL = 'https://api.modrinth.com/v2'
 const API_V3_BASE_URL = 'https://api.modrinth.com/v3'
-const USER_AGENT = 'Minirynth/0.4.7 (Unofficial mobile port for Modrinth)'
+const USER_AGENT = 'Minirynth/0.5.4-dev (Unofficial mobile client for Modrinth)'
 const CACHE_PREFIX = 'minirynth.cache.'
 const CACHE_TTL = 10 * 60 * 1000
 
@@ -231,6 +231,20 @@ export async function modifyProject(slugOrId: string, payload: ProjectEditPayloa
   clearProjectCache(slugOrId)
 }
 
+export interface ScheduleInput {
+  time: string
+  requested_status: 'approved' | 'archived' | 'unlisted' | 'private' | 'draft'
+}
+
+export async function scheduleProject(slugOrId: string, input: ScheduleInput): Promise<void> {
+  await apiFetch<void>(`/project/${encodeURIComponent(slugOrId)}/schedule`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  })
+  clearProjectCache(slugOrId)
+}
+
 export interface CreateProjectInput {
   title: string
   slug?: string
@@ -454,6 +468,103 @@ export function getProjectVersions(
   )
 }
 
+export interface GameVersionTag {
+  version: string
+  version_type: string
+  date: string
+  major: boolean | string
+}
+
+export function getGameVersions(): Promise<GameVersionTag[]> {
+  return cached('game-versions', () => apiFetch<GameVersionTag[]>('/tag/game_version'))
+}
+
+export interface Collection {
+  id: string
+  user: string
+  name: string
+  description: string | null
+  created: string
+  updated: string
+  icon_url: string | null
+  color: number | null
+  status: string
+  projects: string[]
+}
+
+export function getUserCollections(userId: string): Promise<Collection[]> {
+  return cached(`collections:${userId}`, () =>
+    apiFetchV3<Collection[]>(`/user/${encodeURIComponent(userId)}/collections`),
+  )
+}
+
+export function getCollection(id: string): Promise<Collection> {
+  return apiFetchV3<Collection>(`/collection/${encodeURIComponent(id)}`)
+}
+
+export function getProjectsByIds(ids: string[]): Promise<Project[]> {
+  if (ids.length === 0) return Promise.resolve([])
+  return cached(`projects:${ids.join(',')}`, () =>
+    apiFetch<Project[]>(`/projects?ids=${encodeURIComponent(JSON.stringify(ids))}`),
+  )
+}
+
+export async function removeProjectFromCollection(collectionId: string, projectId: string) {
+  const collection = await getCollection(collectionId)
+  const projects = collection.projects.filter((id) => id !== projectId)
+  await apiFetchV3<void>(`/collection/${encodeURIComponent(collectionId)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ new_projects: projects }),
+  })
+  clearCachePrefix('collections:')
+  return projects
+}
+
+export async function createCollection(name: string, description: string) {
+  const collection = await apiFetchV3<Collection>('/collection', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name,
+      description: description.trim() || undefined,
+      projects: [],
+    }),
+  })
+  clearCachePrefix('collections:')
+  return collection
+}
+
+export async function updateCollection(id: string, name: string, description: string) {
+  await apiFetchV3<void>(`/collection/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, description: description.trim() || null }),
+  })
+  clearCachePrefix('collections:')
+}
+
+export async function deleteCollection(id: string) {
+  await apiFetchV3<void>(`/collection/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  })
+  clearCachePrefix('collections:')
+}
+
+export async function addProjectToCollection(collectionId: string, projectId: string) {
+  const collection = await apiFetchV3<Collection>(
+    `/collection/${encodeURIComponent(collectionId)}`,
+  )
+  if (collection.projects.includes(projectId)) return
+
+  await apiFetchV3<void>(`/collection/${encodeURIComponent(collectionId)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ new_projects: [...collection.projects, projectId] }),
+  })
+  clearCachePrefix('collections:')
+}
+
 export interface CreateVersionInput {
   project_id: string
   name: string
@@ -508,6 +619,15 @@ export async function modifyVersion(id: string, payload: VersionEditPayload): Pr
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+  })
+  clearApiCache()
+}
+
+export async function scheduleVersion(id: string, input: ScheduleInput): Promise<void> {
+  await apiFetch<void>(`/version/${id}/schedule`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
   })
   clearApiCache()
 }

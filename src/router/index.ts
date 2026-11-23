@@ -5,6 +5,10 @@ import SearchView from '../views/SearchView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import LoginView from '../views/LoginView.vue'
 import SettingsView from '../views/SettingsView.vue'
+import LauncherFoldersView from '../views/LauncherFoldersView.vue'
+import CollectionsView from '../views/CollectionsView.vue'
+import CollectionView from '../views/CollectionView.vue'
+import InstanceView from '../views/InstanceView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import AnalyticsView from '../views/AnalyticsView.vue'
 import NotificationsView from '../views/NotificationsView.vue'
@@ -27,6 +31,10 @@ const router = createRouter({
     { path: '/login', name: 'login', component: LoginView },
     { path: '/oauth/callback', name: 'oauth-callback', component: OAuthCallbackView },
     { path: '/settings', name: 'settings', component: SettingsView },
+    { path: '/launcher-folders', name: 'launcher-folders', component: LauncherFoldersView },
+    { path: '/collections', name: 'collections', component: CollectionsView },
+    { path: '/collections/:id', name: 'collection', component: CollectionView },
+    { path: '/instances/:id', name: 'instance', component: InstanceView },
     { path: '/dashboard', name: 'dashboard', component: DashboardView },
     { path: '/analytics', name: 'analytics', component: AnalyticsView },
     { path: '/credits', name: 'credits', component: CreditsView },

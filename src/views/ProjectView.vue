@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import {
   ArrowLeft,
+  Bookmark,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Download,
   ExternalLink,
   Heart,
   Pencil,
+  Plus,
   Settings,
   Trash,
   X,
@@ -20,18 +23,27 @@ import VersionUploadDialog from '../components/VersionUploadDialog.vue'
 import VersionEditDialog from '../components/VersionEditDialog.vue'
 import GalleryUploadDialog from '../components/GalleryUploadDialog.vue'
 import GalleryEditDialog from '../components/GalleryEditDialog.vue'
+import ScheduleDialog from '../components/ScheduleDialog.vue'
 import downloadIcon from '../assets/icons/download.svg?raw'
 import heartIcon from '../assets/icons/heart.svg?raw'
 import {
   deleteGalleryImage,
   deleteProject,
+  addProjectToCollection,
+  createCollection,
+  deleteCollection,
   deleteVersion,
   getProject,
   getProjectMembers,
   getProjectVersions,
+  getUserCollections,
+  scheduleProject,
+  scheduleVersion,
   type ProjectDetail,
   type ProjectMember,
   type ProjectVersion,
+  type ScheduleInput,
+  type Collection,
 } from '../api/client'
 import { renderMarkdown } from '../utils/markdown'
 import { tagIconSvg } from '../data/tag-icons'
@@ -39,11 +51,17 @@ import { linkIcon } from '../utils/link-icons'
 import { userPath } from '../utils/user-path'
 import { useAuth } from '../composables/useAuth'
 import { useFollows } from '../composables/useFollows'
+import { useLauncherFolders } from '../composables/useLauncherFolders'
+import { useInstalledContent } from '../composables/useInstalledContent'
+import { isNativeLauncherFolders, writeFileNative } from '../plugins/launcher-folders'
+import type { ContentFolder } from '../utils/launcher-folders'
 
 const route = useRoute()
 const router = useRouter()
 const { user } = useAuth()
 const { writeError: followWriteError, load: loadFollows, isFollowing, toggle: toggleFollow } = useFollows()
+const { instances } = useLauncherFolders()
+const { recordInstall } = useInstalledContent()
 
 const project = ref<ProjectDetail | null>(null)
 const versions = ref<ProjectVersion[]>([])
@@ -54,6 +72,22 @@ const error = ref('')
 const downloadOpen = ref(false)
 const selectedGameVersion = ref('')
 const selectedLoader = ref('')
+const selectedInstanceId = ref('')
+const instanceDownloading = ref(false)
+const instanceDownloadError = ref('')
+const instanceDownloadDone = ref(false)
+const collections = ref<Collection[]>([])
+const collectionsLoading = ref(false)
+const collectionOpen = ref(false)
+const collectionError = ref('')
+const collectionSavingId = ref('')
+const collectionSavedIds = ref<string[]>([])
+const showCreateCollection = ref(false)
+const newCollectionName = ref('')
+const newCollectionDescription = ref('')
+const creatingCollection = ref(false)
+const pendingCollectionDelete = ref<Collection | null>(null)
+const deletingCollection = ref(false)
 const copiedId = ref(false)
 const expandedChangelogs = ref<Record<string, boolean>>({})
 const galleryOpen = ref(false)
@@ -62,6 +96,10 @@ const editOpen = ref(false)
 const uploadOpen = ref(false)
 const galleryUploadOpen = ref(false)
 const editingVersion = ref<ProjectVersion | null>(null)
+const projectScheduleOpen = ref(false)
+const schedulingVersion = ref<ProjectVersion | null>(null)
+const scheduling = ref(false)
+const scheduleError = ref('')
 const pendingDelete = ref<{
   kind: 'gallery' | 'version' | 'project'
   id: string
@@ -131,8 +169,8 @@ watch(galleryOpen, (open) => {
   document.body.style.overflow = open ? 'hidden' : ''
 })
 
-watch(downloadOpen, (open) => {
-  if (open) {
+watch([downloadOpen, collectionOpen], ([download, collection]) => {
+  if (download || collection) {
     document.body.style.overflow = 'hidden'
   } else if (!document.querySelector('.overlay')) {
     document.body.style.overflow = ''
@@ -141,7 +179,9 @@ watch(downloadOpen, (open) => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', measureIndicator)
-  if (downloadOpen.value || galleryOpen.value) document.body.style.overflow = ''
+  if (downloadOpen.value || galleryOpen.value || collectionOpen.value) {
+    document.body.style.overflow = ''
+  }
 })
 
 const tabs = [
@@ -252,6 +292,36 @@ const matchedVersion = computed(() =>
 
 const matchedFile = computed(() => matchedVersion.value?.files[0] ?? null)
 
+function contentFolderForProject(type: string): ContentFolder | null {
+  if (type === 'mod') return 'mods'
+  if (type === 'resource-pack') return 'resourcepacks'
+  if (type === 'shader') return 'shaders'
+  if (type === 'data-pack') return 'datapacks'
+  return null
+}
+
+const contentFolder = computed(() =>
+  project.value ? contentFolderForProject(project.value.project_type) : null,
+)
+
+const selectedInstance = computed(
+  () => instances.value.find((item) => item.id === selectedInstanceId.value) ?? null,
+)
+
+const targetFolderName = computed(() => {
+  const instance = selectedInstance.value
+  const folder = contentFolder.value
+  if (!instance || !folder) return ''
+  return instance.folders[folder] || folder
+})
+
+function folderLabel(folder: ContentFolder) {
+  if (folder === 'resourcepacks') return 'Resource packs'
+  if (folder === 'shaders') return 'Shaders'
+  if (folder === 'datapacks') return 'Data packs'
+  return 'Mods'
+}
+
 const following = computed(() =>
   project.value ? isFollowing(project.value.id) : false,
 )
@@ -281,6 +351,47 @@ function openGalleryUpload() {
 
 function editVersion(version: ProjectVersion) {
   editingVersion.value = version
+}
+
+function openProjectSchedule() {
+  scheduleError.value = ''
+  projectScheduleOpen.value = true
+}
+
+function openVersionSchedule(version: ProjectVersion) {
+  scheduleError.value = ''
+  schedulingVersion.value = version
+}
+
+async function onProjectScheduled(input: ScheduleInput) {
+  if (!project.value) return
+  scheduling.value = true
+  scheduleError.value = ''
+  try {
+    await scheduleProject(project.value.id, input)
+    projectScheduleOpen.value = false
+    await load()
+  } catch (cause) {
+    scheduleError.value = cause instanceof Error ? cause.message : 'Could not schedule this release.'
+  } finally {
+    scheduling.value = false
+  }
+}
+
+async function onVersionScheduled(input: ScheduleInput) {
+  const target = schedulingVersion.value
+  if (!target) return
+  scheduling.value = true
+  scheduleError.value = ''
+  try {
+    await scheduleVersion(target.id, input)
+    schedulingVersion.value = null
+    await load()
+  } catch (cause) {
+    scheduleError.value = cause instanceof Error ? cause.message : 'Could not schedule this version.'
+  } finally {
+    scheduling.value = false
+  }
 }
 
 function requestGalleryDelete(image: ProjectDetail['gallery'][number]) {
@@ -361,7 +472,153 @@ function openDownload() {
   if (!selectedLoader.value && loaderOptions.value.length) {
     selectedLoader.value = loaderOptions.value[0]
   }
+  if (!selectedInstanceId.value && instances.value.length) {
+    selectedInstanceId.value = instances.value[0].id
+  }
+  instanceDownloadError.value = ''
+  instanceDownloadDone.value = false
   downloadOpen.value = true
+}
+
+async function downloadToInstance() {
+  const file = matchedFile.value
+  const instance = selectedInstance.value
+  const folder = contentFolder.value
+  if (!file || !instance || !folder) return
+
+  const directUri = instance.folderUris[folder]
+  const uri = directUri || instance.uri
+  if (!uri) {
+    instanceDownloadError.value = 'That folder is not connected yet. Set it up in Launcher folders.'
+    return
+  }
+
+  instanceDownloading.value = true
+  instanceDownloadError.value = ''
+  instanceDownloadDone.value = false
+
+  try {
+    await writeFileNative({
+      uri,
+      folder: directUri ? '' : instance.folders[folder] || folder,
+      filename: file.filename,
+      url: file.url,
+    })
+
+    if (project.value && matchedVersion.value) {
+      recordInstall({
+        instanceId: instance.id,
+        folder,
+        filename: file.filename,
+        projectId: project.value.id,
+        projectSlug: project.value.slug,
+        projectTitle: project.value.title,
+        projectType: project.value.project_type,
+        iconUrl: project.value.icon_url,
+        versionId: matchedVersion.value.id,
+        versionName: matchedVersion.value.version_number,
+      })
+    }
+
+    instanceDownloadDone.value = true
+  } catch (error) {
+    instanceDownloadError.value = error instanceof Error ? error.message : 'Download failed.'
+  } finally {
+    instanceDownloading.value = false
+  }
+}
+
+async function openCollections() {
+  collectionOpen.value = true
+  collectionError.value = ''
+  collectionSavedIds.value = []
+  showCreateCollection.value = false
+  newCollectionName.value = ''
+  newCollectionDescription.value = ''
+  pendingCollectionDelete.value = null
+  if (!user.value) {
+    collectionOpen.value = false
+    router.push('/login')
+    return
+  }
+
+  collectionsLoading.value = true
+  try {
+    collections.value = await getUserCollections(user.value.id)
+  } catch (error) {
+    collections.value = []
+    collectionError.value =
+      error instanceof Error ? error.message : 'Could not load collections.'
+  } finally {
+    collectionsLoading.value = false
+  }
+}
+
+async function addToCollection(collection: Collection) {
+  if (!project.value) return
+
+  collectionSavingId.value = collection.id
+  collectionError.value = ''
+  try {
+    await addProjectToCollection(collection.id, project.value.id)
+    collectionSavedIds.value = [...collectionSavedIds.value, collection.id]
+    collection.projects = [...collection.projects, project.value.id]
+  } catch (error) {
+    collectionError.value = error instanceof Error ? error.message : 'Could not save to collection.'
+  } finally {
+    collectionSavingId.value = ''
+  }
+}
+
+async function createNewCollection() {
+  const name = newCollectionName.value.trim()
+  const description = newCollectionDescription.value.trim()
+  if (name.length < 3 || name.length > 64) {
+    collectionError.value = 'Name must be between 3 and 64 characters.'
+    return
+  }
+  if (description && (description.length < 3 || description.length > 255)) {
+    collectionError.value = 'Description must be between 3 and 255 characters.'
+    return
+  }
+
+  creatingCollection.value = true
+  collectionError.value = ''
+  try {
+    const collection = await createCollection(name, description)
+    collections.value = [collection, ...collections.value]
+    newCollectionName.value = ''
+    newCollectionDescription.value = ''
+    showCreateCollection.value = false
+  } catch (error) {
+    collectionError.value = error instanceof Error ? error.message : 'Could not create collection.'
+  } finally {
+    creatingCollection.value = false
+  }
+}
+
+async function removeCollection() {
+  const collection = pendingCollectionDelete.value
+  if (!collection) return
+
+  deletingCollection.value = true
+  collectionError.value = ''
+  try {
+    await deleteCollection(collection.id)
+    collections.value = collections.value.filter((item) => item.id !== collection.id)
+    pendingCollectionDelete.value = null
+  } catch (error) {
+    collectionError.value = error instanceof Error ? error.message : 'Could not delete collection.'
+  } finally {
+    deletingCollection.value = false
+  }
+}
+
+function isCollectionSaved(collection: Collection) {
+  return (
+    collectionSavedIds.value.includes(collection.id) ||
+    (!!project.value && collection.projects.includes(project.value.id))
+  )
 }
 
 function formatCount(value: number) {
@@ -403,6 +660,7 @@ async function load() {
   members.value = []
   tab.value = 'about'
   downloadOpen.value = false
+  collectionOpen.value = false
   editOpen.value = false
   uploadOpen.value = false
   galleryUploadOpen.value = false
@@ -479,6 +737,22 @@ onMounted(load)
             <button
               type="button"
               class="project-page__follow"
+              aria-label="Schedule project release"
+              @click="openProjectSchedule"
+            >
+              <Clock :size="18" :stroke-width="2.5" />
+            </button>
+            <button
+              type="button"
+              class="project-page__follow"
+              aria-label="Save to collection"
+              @click="openCollections"
+            >
+              <Bookmark :size="18" :stroke-width="2.5" />
+            </button>
+            <button
+              type="button"
+              class="project-page__follow"
               aria-label="Download"
               @click="openDownload"
             >
@@ -498,6 +772,14 @@ onMounted(load)
             <button type="button" class="project-page__download" @click="openDownload">
               <span class="project-page__action-icon" aria-hidden="true" v-html="downloadIcon"></span>
               Download
+            </button>
+            <button
+              type="button"
+              class="project-page__follow"
+              aria-label="Save to collection"
+              @click="openCollections"
+            >
+              <Bookmark :size="18" :stroke-width="2.5" />
             </button>
             <button
               type="button"
@@ -561,10 +843,19 @@ onMounted(load)
                 <span class="version-card__number">{{ version.version_number }}</span>
               </div>
               <div v-if="canEdit" class="version-card__manage">
-                <button type="button" aria-label="Edit version" @click="editVersion(version)">
+                <button
+                  v-if="canEdit"
+                  type="button"
+                  aria-label="Schedule version release"
+                  @click="openVersionSchedule(version)"
+                >
+                  <Clock :size="18" :stroke-width="2.2" />
+                </button>
+                <button v-if="canEdit" type="button" aria-label="Edit version" @click="editVersion(version)">
                   <Pencil :size="18" :stroke-width="2.2" />
                 </button>
                 <button
+                  v-if="canEdit"
                   type="button"
                   class="is-danger"
                   aria-label="Delete version"
@@ -824,10 +1115,165 @@ onMounted(load)
                 Download {{ matchedFile.filename }}
               </a>
               <p v-else class="download-dialog__empty">No file matches that combination.</p>
+
+              <div v-if="isNativeLauncherFolders() && instances.length" class="download-dialog__instance">
+                <p class="download-dialog__label">Download to instance</p>
+                <label class="edit-field">
+                  <span>Instance</span>
+                  <select v-model="selectedInstanceId">
+                    <option v-for="instance in instances" :key="instance.id" :value="instance.id">
+                      {{ instance.name }}
+                    </option>
+                  </select>
+                </label>
+                <p v-if="contentFolder" class="download-dialog__hint">
+                  Saves to {{ folderLabel(contentFolder) }} in {{ targetFolderName }}
+                </p>
+                <p v-else class="download-dialog__empty">
+                  No matching folder for this project type.
+                </p>
+                <button
+                  v-if="matchedFile && contentFolder"
+                  type="button"
+                  class="download-dialog__button"
+                  :disabled="instanceDownloading"
+                  @click="downloadToInstance"
+                >
+                  <span class="project-page__action-icon" aria-hidden="true" v-html="downloadIcon"></span>
+                  {{
+                    instanceDownloading
+                      ? 'Downloading...'
+                      : `Download to ${selectedInstance?.name ?? 'instance'}`
+                  }}
+                </button>
+                <p v-if="instanceDownloadError" class="download-dialog__error">
+                  {{ instanceDownloadError }}
+                </p>
+                <p v-if="instanceDownloadDone" class="download-dialog__done">
+                  Saved to {{ targetFolderName }}.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </Transition>
+    </Teleport>
+
+    <Teleport to="body">
+      <Transition name="pop">
+        <div v-if="collectionOpen" class="download-overlay edit-overlay" @click.self="collectionOpen = false">
+          <div class="download-dialog edit-dialog" role="dialog" aria-modal="true" aria-label="Save to collection">
+            <header class="download-dialog__header">
+              <h2>Save to collection</h2>
+              <button type="button" aria-label="Close collections" @click="collectionOpen = false">
+                <X :size="24" :stroke-width="2.5" />
+              </button>
+            </header>
+
+            <div class="edit-dialog__body">
+              <p class="schedule-dialog__note">Choose a collection on your Modrinth profile.</p>
+              <p v-if="collectionError" class="edit-dialog__error">{{ collectionError }}</p>
+
+              <button
+                v-if="!showCreateCollection"
+                type="button"
+                class="collection-new"
+                @click="showCreateCollection = true"
+              >
+                <Plus :size="16" :stroke-width="2.5" /> New collection
+              </button>
+              <div v-else class="collection-create">
+                <label class="edit-field">
+                  <span>Name</span>
+                  <input v-model="newCollectionName" placeholder="e.g. Performance mods" />
+                </label>
+                <label class="edit-field">
+                  <span>Description</span>
+                  <input v-model="newCollectionDescription" placeholder="Optional" />
+                </label>
+                <div class="edit-dialog__actions">
+                  <button
+                    type="button"
+                    class="edit-dialog__cancel"
+                    :disabled="creatingCollection"
+                    @click="showCreateCollection = false"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    class="edit-dialog__save"
+                    :disabled="creatingCollection"
+                    @click="createNewCollection"
+                  >
+                    {{ creatingCollection ? 'Creating...' : 'Create' }}
+                  </button>
+                </div>
+              </div>
+
+              <p v-if="collectionsLoading" class="schedule-dialog__note">Loading collections...</p>
+              <p v-else-if="collections.length === 0 && !collectionError" class="schedule-dialog__note">
+                No collections yet. Create one above.
+              </p>
+              <div v-for="collection in collections" :key="collection.id" class="collection-row">
+                <div class="collection-row__main">
+                  <span class="collection-row__name">{{ collection.name }}</span>
+                  <span class="collection-row__meta">{{ collection.projects.length }} projects</span>
+                </div>
+                <div class="collection-row__actions">
+                  <button
+                    type="button"
+                    class="collection-row__button"
+                    :disabled="collectionSavingId === collection.id || isCollectionSaved(collection)"
+                    @click="addToCollection(collection)"
+                  >
+                    {{ collectionSavingId === collection.id ? 'Saving...' : isCollectionSaved(collection) ? 'Saved' : 'Add' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="collection-row__delete"
+                    :aria-label="`Delete ${collection.name}`"
+                    @click="pendingCollectionDelete = collection"
+                  >
+                    <Trash :size="16" :stroke-width="2.2" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <Teleport to="body">
+      <div
+        v-if="pendingCollectionDelete"
+        class="overlay confirm-overlay"
+        @click.self="pendingCollectionDelete = null"
+      >
+        <div class="confirm-card" role="dialog" aria-modal="true" aria-label="Confirm delete collection">
+          <h2 class="confirm-card__title">Delete {{ pendingCollectionDelete.name }}?</h2>
+          <p class="confirm-card__text">This can't be undone.</p>
+          <div class="confirm-card__actions">
+            <button
+              type="button"
+              class="confirm-card__cancel"
+              :disabled="deletingCollection"
+              @click="pendingCollectionDelete = null"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="confirm-card__confirm"
+              :disabled="deletingCollection"
+              @click="removeCollection"
+            >
+              {{ deletingCollection ? 'Deleting...' : 'Delete' }}
+            </button>
+          </div>
+        </div>
+      </div>
     </Teleport>
 
     <Teleport to="body">
@@ -930,6 +1376,24 @@ onMounted(load)
       :version="editingVersion"
       @close="editingVersion = null"
       @saved="onProjectSaved"
+    />
+
+    <ScheduleDialog
+      v-if="projectScheduleOpen && project"
+      title="Schedule project release"
+      :saving="scheduling"
+      :error="scheduleError"
+      @close="projectScheduleOpen = false"
+      @scheduled="onProjectScheduled"
+    />
+
+    <ScheduleDialog
+      v-if="schedulingVersion"
+      :title="'Schedule ' + schedulingVersion.version_number"
+      :saving="scheduling"
+      :error="scheduleError"
+      @close="schedulingVersion = null"
+      @scheduled="onVersionScheduled"
     />
 
     <Teleport to="body">

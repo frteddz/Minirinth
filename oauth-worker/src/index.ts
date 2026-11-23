@@ -1,5 +1,10 @@
 const DEFAULT_SCOPES =
-  'USER_READ+USER_WRITE+NOTIFICATION_READ+NOTIFICATION_WRITE+ANALYTICS+PROJECT_CREATE+PROJECT_READ+PROJECT_WRITE+PROJECT_DELETE+VERSION_CREATE+VERSION_WRITE+VERSION_DELETE+ORGANIZATION_CREATE+ORGANIZATION_READ+ORGANIZATION_WRITE'
+  'USER_READ+USER_WRITE+NOTIFICATION_READ+NOTIFICATION_WRITE+ANALYTICS+PROJECT_CREATE+PROJECT_READ+PROJECT_WRITE+PROJECT_DELETE+VERSION_CREATE+VERSION_WRITE+VERSION_DELETE+ORGANIZATION_CREATE+ORGANIZATION_READ+ORGANIZATION_WRITE+COLLECTION_READ+COLLECTION_WRITE+COLLECTION_CREATE+COLLECTION_DELETE'
+
+function requestedScopes(env: Env) {
+  const fromEnv = env.OAUTH_SCOPES?.split('+').filter(Boolean) ?? []
+  return [...new Set([...DEFAULT_SCOPES.split('+'), ...fromEnv])].join('+')
+}
 
 interface Env {
   MODRINTH_CLIENT_ID: string
@@ -37,7 +42,7 @@ export default {
       const authorize = new URL('https://modrinth.com/auth/authorize')
       authorize.searchParams.set('response_type', 'code')
       authorize.searchParams.set('client_id', env.MODRINTH_CLIENT_ID)
-      authorize.searchParams.set('scope', env.OAUTH_SCOPES ?? DEFAULT_SCOPES)
+      authorize.searchParams.set('scope', requestedScopes(env))
       authorize.searchParams.set('state', `${isWeb ? 'web' : 'native'}:${crypto.randomUUID()}`)
       authorize.searchParams.set('redirect_uri', redirectUri)
       return redirectTo(authorize.toString())

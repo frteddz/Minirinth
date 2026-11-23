@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSearchOverlay } from '../composables/useSearchOverlay'
 import { useNotifications } from '../composables/useNotifications'
 import { useAuth } from '../composables/useAuth'
+import { useCategoryFilters } from '../composables/useCategoryFilters'
 import bellIcon from '../assets/icons/notifications/bell.svg?raw'
 import menuIcon from '../assets/icons/menu.svg?raw'
 import userIcon from '../assets/icons/user.svg?raw'
@@ -12,6 +13,7 @@ import organizationIcon from '../assets/icons/organization.svg?raw'
 const route = useRoute()
 const router = useRouter()
 const { searchOpen, closeSearch, toggleSearch } = useSearchOverlay()
+const { filterOpen, closeFilter } = useCategoryFilters()
 const { unreadCount } = useNotifications()
 const { user, accounts, currentAccount, signOut, switchAccount } = useAuth()
 
@@ -37,15 +39,19 @@ function popIcon(name: string) {
 
 function selectHome() {
   closeSearch()
+  closeFilter()
   popIcon('home')
 }
 
 function selectSearch() {
+  closeFilter()
   toggleSearch()
   popIcon('search')
 }
 
 function selectMenu() {
+  closeSearch()
+  closeFilter()
   menuOpen.value = !menuOpen.value
   popIcon('menu')
 }
@@ -82,10 +88,18 @@ watch(
     lastScroll = 0
     menuOpen.value = false
     accountBubbleOpen.value = false
+    closeFilter()
   },
 )
 
 watch(searchOpen, (open) => {
+  if (open) {
+    menuOpen.value = false
+    accountBubbleOpen.value = false
+  }
+})
+
+watch(filterOpen, (open) => {
   if (open) {
     menuOpen.value = false
     accountBubbleOpen.value = false
@@ -135,6 +149,18 @@ function openAnalytics() {
   menuOpen.value = false
   closeSearch()
   router.push('/analytics')
+}
+
+function showCollections() {
+  menuOpen.value = false
+  closeSearch()
+  router.push('/collections')
+}
+
+function showLauncherFolders() {
+  menuOpen.value = false
+  closeSearch()
+  router.push('/launcher-folders')
 }
 
 function openAccountBubble() {
@@ -266,6 +292,18 @@ function openSignIn() {
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-column preview-icon"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
             </span>
             <span>Analytics</span>
+          </button>
+          <button type="button" class="menu-popover__item" role="menuitem" @click="showCollections">
+            <span class="menu-popover__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bookmark preview-icon"><path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"/></svg>
+            </span>
+            <span>Collections</span>
+          </button>
+          <button type="button" class="menu-popover__item" role="menuitem" @click="showLauncherFolders">
+            <span class="menu-popover__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-sync preview-icon"><path d="M9 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v.5"/><path d="M12 10v4h4"/><path d="m12 14 1.535-1.605a5 5 0 0 1 8 1.5"/><path d="M22 22v-4h-4"/><path d="m22 18-1.535 1.605a5 5 0 0 1-8-1.5"/></svg>
+            </span>
+            <span>Connect launcher folder</span>
           </button>
           <button type="button" class="menu-popover__item" role="menuitem" @click="openNotifications">
             <span class="menu-popover__icon" aria-hidden="true" v-html="bellIcon"></span>
