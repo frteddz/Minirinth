@@ -77,7 +77,7 @@ Prebuilt Android APKs are on the [releases page](https://github.com/frteddz/Mini
 [![Github](https://raw.githubusercontent.com/frteddz/pixel-icons-library-/main/96x/github_icon_bg.png)](https://github.com/frteddz)
 [![CurseForge](https://raw.githubusercontent.com/frteddz/pixel-icons-library-/main/96x/cruseforge_icon_bg.png)](https://www.curseforge.com/members/teddz/)
 
--# Minirynth is built by a single developer. if you’d like to support the project, you can [donate here](https://ko-fi.com/majdsafi).
+ **Minirynth is built by a single developer. if you’d like to support the project, you can [donate here](https://ko-fi.com/majdsafi).**
 </div>
 
 ## Licensing
