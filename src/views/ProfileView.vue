@@ -11,6 +11,7 @@ import { tagIconSvg } from '../data/tag-icons'
 import downloadIcon from '../assets/icons/download.svg?raw'
 import heartIcon from '../assets/icons/heart.svg?raw'
 import globeIcon from '../assets/icons/globe.svg?raw'
+import pkg from '../../package.json'
 
 const router = useRouter()
 const { user, loading, error, restore, signOut } = useAuth()
@@ -260,7 +261,7 @@ onMounted(restore)
     </template>
 
     <p class="page__footer">
-      <span class="app-version">0.4.7-dev The Creator Tools Update</span>
+      <span class="app-version">{{ pkg.displayVersion }}</span>
       Powered by the <a href="https://modrinth.com" target="_blank" rel="noopener">Modrinth API</a>.
     </p>
 

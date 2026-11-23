@@ -3,6 +3,7 @@ import { onUnmounted, ref, watch } from 'vue'
 import Card from '../ui/components/Card.vue'
 import { useTheme } from '../composables/useTheme'
 import { useNotificationSettings } from '../composables/useNotificationSettings'
+import pkg from '../../package.json'
 import { useSystemNotifications } from '../composables/useSystemNotifications'
 import {
   silentChannelId,
@@ -17,7 +18,7 @@ const notificationPermission = ref('')
 const timedTestSeconds = ref(0)
 let timedTestTimer: ReturnType<typeof setInterval> | undefined
 
-const version = '0.4.7-dev The Creator Tools Update'
+const version = pkg.displayVersion
 const {
   settings: soundSettings,
   soundOptions,

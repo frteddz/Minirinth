@@ -1,6 +1,7 @@
 {
   "name": "minirynth",
-  "version": "0.4.7",
+  "version": "0.5.4",
+  "displayVersion": "0.5.4-dev The Anywhere Update",
   "private": true,
   "type": "module",
   "scripts": {

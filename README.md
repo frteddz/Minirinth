@@ -2,11 +2,11 @@
 
 Formerly Minirinth.
 
-Unofficial mobile port for Modrinth. Browse mods, resource packs, shaders, data packs, modpacks and plugins on your phone. It reads from the public Modrinth API and never installs or launches Minecraft.
+Unofficial mobile port for Modrinth. Browse mods, resource packs, shaders, data packs, modpacks and plugins on your phone, and manage releases for projects you own. It reads from the public Modrinth API and never installs or launches Minecraft.
 
 Vue 3, TypeScript and Vite, wrapped for Android with Capacitor. Powered by the [Modrinth API](https://modrinth.com), not affiliated with Modrinth.
 
-Current build: v0.4.7-dev.
+Current build: v0.5.4-dev The Anywhere Update.
 
 ## Contents
 
@@ -27,9 +27,11 @@ Current build: v0.4.7-dev.
 - Sign in with your Modrinth account through OAuth. A personal access token still works as a fallback, and you can save a few accounts and switch between them without signing out.
 - See your profile, published projects, download counts and bio.
 - Follow projects and read your notifications on their own page. Notifications can pop up with custom sounds even while the app is in the background.
+- Save projects to your Modrinth collections from a project page. A Collections page in the menu can create, edit, delete and view them.
 - Creator tools: a dashboard and analytics with download and follower stats.
 - Create, edit and delete projects. Edit descriptions, tags, license, links, icons and gallery images.
 - Upload, edit and delete versions, including extra files and dependencies.
+- Schedule project and version releases from a project page, with local time entry and status selection.
 - Join, leave, create and edit organizations. Manage members, roles, ownership and project transfers.
 - Open public user profiles from project pages and project member lists.
 - Eight themes and per-sound notification volume controls.
@@ -40,7 +42,7 @@ Current build: v0.4.7-dev.
 - Adding mods, resource packs, data packs, and so on to your Modrinth instance from Minirynth where ever you are. for example: you are having a vacation on a beach in Hawaii and for a random reason a thought popped in your head that you wanna add a mod to your Modrinth instance but you can't since your miles away from your pc, so you download Minirynth and just by a couple clicks of a button (i hope so) the mod is automatically added to your Modrinth instance. soo yea.. this one will be big and difficult (as far as i know), so this will be later on. (There is no specific date for this yet)
 - Working with mobile Minecraft launchers like Mojo, so Minirynth can add things straight to the instance you actually play on. I want to support as many mobile launchers as I can, but I'm not promising a specific list or date yet.
 - Managing servers from your phone. Adding mods, updating packs and keeping everything in sync while you are away from your pc. This is the one I want most, honestly.
-- Scheduling releases, collections, content disclosures and payouts.
+- Content disclosures and payouts.
 - More to come i just don't know what..
 
 ## Screenshots

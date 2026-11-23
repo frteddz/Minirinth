@@ -3,9 +3,74 @@
 Minirynth, formerly Minirinth. Unofficial mobile port for Modrinth.
 Every versioned APK stays in `builds/`
 
-The 0.4.x builds are still for testing. 0.4.0 has not shipped.
+The 0.4.x and 0.5.x builds are still for testing. 0.4.0 has not shipped.
 
-## 0.4.7-dev - 2026-11-23
+## 0.5.4-dev The Anywhere Update - 2026-11-23
+
+### Fixed
+
+- Game version dropdown no longer opens the keyboard when it opens. Enter closes the keyboard and leaves the dropdown open.
+
+### Improved
+
+- Manage content viewer shows project icons for files downloaded through Minirynth, with a letter fallback for the rest.
+- Settings version label now reads from `package.json` like the profile footer, and the API User-Agent matches the build.
+
+## 0.5.3-dev The Anywhere Update - 2026-11-23
+
+### Added
+
+- Launcher folders page from the menu, with instances, manual content folder entry and auto-detect from a picked root folder.
+- Native Android folder picker using Storage Access Framework, with permission kept across restarts.
+- Download to instance in the download dialog. Mods, resource packs, shaders and data packs go to their matching folder automatically.
+- Data packs use the standard `datapacks` folder in each instance.
+- Warning when auto-detect cannot find a standard folder, with manual override.
+- Instance viewer page with a tab per content folder, file sizes and dates, and delete with confirmation.
+- Files downloaded through Minirynth are recorded locally, so the viewer shows their exact project and version. Files added elsewhere show as Unknown.
+- The viewer opens from a labelled Manage content button, so it is not mistaken for opening a file manager.
+- Removing an instance asks for confirmation, and both delete controls are red bordered buttons.
+- Game version filters now load from Modrinth's game version tags, so versions like 1.21.10 show up without an app update. The old hardcoded list stays as a fallback if that request fails.
+- Save projects to your Modrinth collections from the project page, and create or delete collections there too.
+- Resource pack resolution filters now bold the scale value and no longer show tag icons.
+- A Collections page from the hamburger menu, with create, edit and delete for Modrinth collections.
+- Collection detail pages to view the projects inside and remove them from the collection.
+
+### Fixed
+
+- Opening the hamburger menu now closes the filter sheet instead of leaving both popups up.
+- The hamburger menu popover follows the selected theme instead of staying dark.
+- The OAuth worker now always includes the collection scopes, even when an older `OAUTH_SCOPES` variable is set.
+- Version labels on the profile and dev site now come from `package.json`, and the notification runner User-Agent is current.
+- Collection dialog buttons are lighter and match the rest of the app.
+- Clicking a collection row opens it. The separate View button is gone.
+- Coming soon list and Get updates form now line up with their section headings on the dev site.
+- Shortened the Coming soon and Get updates subtitles on the dev site.
+- Devlog now has a search bar, a filter menu, and full-height grouping lines that mark releases from the same update line, without text labels. Tightened the space the lines take and hid them on small screens.
+
+### Note
+
+- Folder picking, file writing and the instance viewer are native-only. The web preview keeps the manual download link.
+- Modpacks and plugins still have no matching folder, since they are not simple file drops into an instance.
+- Collections need `COLLECTION_READ`, `COLLECTION_WRITE`, `COLLECTION_CREATE` and `COLLECTION_DELETE` on the OAuth app. Sign in again after those scopes are enabled. Creating a collection also needs a verified Modrinth email.
+- The request for an OAuth scope to queue content into Modrinth App instances is still waiting on a reply from Modrinth.
+- Internal setup notes stay in `CHANGELOG.md` and are excluded from the public devlog. Local backup paths and build-storage details also stay out of the public devlog.
+
+## 0.5.0-dev The Anywhere Update - 2026-11-23
+
+### Added
+
+- Schedule project releases from the project page.
+- Schedule version releases from each version card.
+- A shared schedule dialog with local time entry, status selection and future-time validation.
+
+### Note
+
+- Builds now also go to `/media/teddz/MAJD-USB/Backups/Minirynth/Builds/` when that drive is mounted.
+- Scheduling writes to the real Modrinth API. Use a test project when trying it.
+- Shared-folder export and the PC companion were prototyped and removed before this build. The official cloud sync idea is kept in `docs/ROADMAP.md` while we wait for feedback from Modrinth.
+- Modrinth Hosting server management, collections, content disclosures and payouts have no public write API yet, so they are documented in `docs/ROADMAP.md` rather than shipped here.
+
+## 0.4.7-dev The Creator Tools Update - 2026-11-23
 
 ### Added
 
@@ -21,7 +86,7 @@ The 0.4.x builds are still for testing. 0.4.0 has not shipped.
 - The saved session is restored once when the app starts, so refreshing any page keeps you signed in.
 - Organization pages now use compact cards with small inline actions instead of full-width buttons.
 
-## 0.4.6-dev - 2026-11-23
+## 0.4.6-dev The Creator Tools Update - 2026-11-23
 
 ### Added
 
@@ -43,7 +108,7 @@ The 0.4.x builds are still for testing. 0.4.0 has not shipped.
 - Signing out removes the current account and switches to another saved account if one exists.
 - Switch account is hidden until you are signed in, and Sign in sits at the top of the menu with an outline border.
 
-## 0.4.5-dev - 2026-11-23
+## 0.4.5-dev The Creator Tools Update - 2026-11-23
 
 ### Added
 
@@ -51,7 +116,7 @@ The 0.4.x builds are still for testing. 0.4.0 has not shipped.
 - Edit form for title, summary, Markdown description, featured and additional tags, license ID and URL, issues/source/wiki/Discord links, client and server side, requested status, and donation links.
 - `PROJECT_WRITE` added to the OAuth scopes requested by the auth worker.
 
-## 0.4.4-dev - 2026-11-22
+## 0.4.4-dev The Creator Tools Update - 2026-11-22
 
 ### Added
 
@@ -61,7 +126,7 @@ The 0.4.x builds are still for testing. 0.4.0 has not shipped.
 
 - Notifications now use the Minirynth mark in the status bar and shade, tinted with the green brand color instead of the default info icon.
 
-## 0.4.3-dev - 2026-11-22
+## 0.4.3-dev The Creator Tools Update - 2026-11-22
 
 ### Added
 
@@ -77,20 +142,20 @@ The 0.4.x builds are still for testing. 0.4.0 has not shipped.
 
 - The volume sliders still only affect the in-app sound. Android controls system notification volume per channel.
 
-## 0.4.2-dev - 2026-11-22
+## 0.4.2-dev The Creator Tools Update - 2026-11-22
 
 ### Added
 
 - Temporary "Test notification in 5s" button in Settings with a visible countdown.
 - Test notifications are posted as heads-up notifications while the app is on screen.
 
-## 0.4.1-dev - 2026-11-22
+## 0.4.1-dev The Creator Tools Update - 2026-11-22
 
 ### Fixed
 
 - Release APKs are signed with the standard Android debug key. The 0.4.0-dev build was rejected as an invalid package because it was unsigned.
 
-## 0.4.0-dev - 2026-11-22
+## 0.4.0-dev The Creator Tools Update - 2026-11-22
 
 ### Added
 
@@ -139,6 +204,9 @@ The 0.4.x builds are still for testing. 0.4.0 has not shipped.
 - Rebranded from Minirinth to Minirynth after Modrinth staff flagged the "rinth" part of the name.
 - App name, Android package, User-Agent and storage keys now use Minirynth.
 - Added "Formerly Minirinth" to the README.
+
+### Note
+
 - Every versioned APK is kept in `builds/`.
 
 ## 0.2.0-dev - 2026-11-22

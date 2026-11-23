@@ -1,6 +1,78 @@
 export const devlog = [
   {
-    "version": "0.4.7-dev",
+    "version": "0.5.4-dev The Anywhere Update",
+    "date": "2026-11-23",
+    "groups": [
+      {
+        "title": "Fixed",
+        "items": [
+          "Game version dropdown no longer opens the keyboard when it opens. Enter closes the keyboard and leaves the dropdown open."
+        ]
+      },
+      {
+        "title": "Improved",
+        "items": [
+          "Manage content viewer shows project icons for files downloaded through Minirynth, with a letter fallback for the rest.",
+          "Settings version label now reads from `package.json` like the profile footer, and the API User-Agent matches the build."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.5.3-dev The Anywhere Update",
+    "date": "2026-11-23",
+    "groups": [
+      {
+        "title": "Added",
+        "items": [
+          "Launcher folders page from the menu, with instances, manual content folder entry and auto-detect from a picked root folder.",
+          "Native Android folder picker using Storage Access Framework, with permission kept across restarts.",
+          "Download to instance in the download dialog. Mods, resource packs, shaders and data packs go to their matching folder automatically.",
+          "Data packs use the standard `datapacks` folder in each instance.",
+          "Warning when auto-detect cannot find a standard folder, with manual override.",
+          "Instance viewer page with a tab per content folder, file sizes and dates, and delete with confirmation.",
+          "Files downloaded through Minirynth are recorded locally, so the viewer shows their exact project and version. Files added elsewhere show as Unknown.",
+          "The viewer opens from a labelled Manage content button, so it is not mistaken for opening a file manager.",
+          "Removing an instance asks for confirmation, and both delete controls are red bordered buttons.",
+          "Game version filters now load from Modrinth's game version tags, so versions like 1.21.10 show up without an app update. The old hardcoded list stays as a fallback if that request fails.",
+          "Save projects to your Modrinth collections from the project page, and create or delete collections there too.",
+          "Resource pack resolution filters now bold the scale value and no longer show tag icons.",
+          "A Collections page from the hamburger menu, with create, edit and delete for Modrinth collections.",
+          "Collection detail pages to view the projects inside and remove them from the collection."
+        ]
+      },
+      {
+        "title": "Fixed",
+        "items": [
+          "Opening the hamburger menu now closes the filter sheet instead of leaving both popups up.",
+          "The hamburger menu popover follows the selected theme instead of staying dark.",
+          "The OAuth worker now always includes the collection scopes, even when an older `OAUTH_SCOPES` variable is set.",
+          "Version labels on the profile and dev site now come from `package.json`, and the notification runner User-Agent is current.",
+          "Collection dialog buttons are lighter and match the rest of the app.",
+          "Clicking a collection row opens it. The separate View button is gone.",
+          "Coming soon list and Get updates form now line up with their section headings on the dev site.",
+          "Shortened the Coming soon and Get updates subtitles on the dev site.",
+          "Devlog now has a search bar, a filter menu, and full-height grouping lines that mark releases from the same update line, without text labels. Tightened the space the lines take and hid them on small screens."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.5.0-dev The Anywhere Update",
+    "date": "2026-11-23",
+    "groups": [
+      {
+        "title": "Added",
+        "items": [
+          "Schedule project releases from the project page.",
+          "Schedule version releases from each version card.",
+          "A shared schedule dialog with local time entry, status selection and future-time validation."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.4.7-dev The Creator Tools Update",
     "date": "2026-11-23",
     "groups": [
       {
@@ -22,7 +94,7 @@ export const devlog = [
     ]
   },
   {
-    "version": "0.4.6-dev",
+    "version": "0.4.6-dev The Creator Tools Update",
     "date": "2026-11-23",
     "groups": [
       {
@@ -50,7 +122,7 @@ export const devlog = [
     ]
   },
   {
-    "version": "0.4.5-dev",
+    "version": "0.4.5-dev The Creator Tools Update",
     "date": "2026-11-23",
     "groups": [
       {
@@ -64,7 +136,7 @@ export const devlog = [
     ]
   },
   {
-    "version": "0.4.4-dev",
+    "version": "0.4.4-dev The Creator Tools Update",
     "date": "2026-11-22",
     "groups": [
       {
@@ -82,7 +154,7 @@ export const devlog = [
     ]
   },
   {
-    "version": "0.4.3-dev",
+    "version": "0.4.3-dev The Creator Tools Update",
     "date": "2026-11-22",
     "groups": [
       {
@@ -98,17 +170,11 @@ export const devlog = [
           "System notifications now use the sound picked in Settings instead of the default channel sound.",
           "Turning a sound off routes that notification to the silent channel."
         ]
-      },
-      {
-        "title": "Note",
-        "items": [
-          "The volume sliders still only affect the in-app sound. Android controls system notification volume per channel."
-        ]
       }
     ]
   },
   {
-    "version": "0.4.2-dev",
+    "version": "0.4.2-dev The Creator Tools Update",
     "date": "2026-11-22",
     "groups": [
       {
@@ -121,7 +187,7 @@ export const devlog = [
     ]
   },
   {
-    "version": "0.4.1-dev",
+    "version": "0.4.1-dev The Creator Tools Update",
     "date": "2026-11-22",
     "groups": [
       {
@@ -133,7 +199,7 @@ export const devlog = [
     ]
   },
   {
-    "version": "0.4.0-dev",
+    "version": "0.4.0-dev The Creator Tools Update",
     "date": "2026-11-22",
     "groups": [
       {
@@ -143,12 +209,6 @@ export const devlog = [
           "Notification permission request on sign-in and from Settings.",
           "Real system notifications from the 5-second test buttons, new in-app notifications, and the background runner.",
           "Background polling every 15 minutes so notifications can still arrive when the app is in the background or closed."
-        ]
-      },
-      {
-        "title": "Note",
-        "items": [
-          "This is polling, not instant push. Android can throttle it, and some phone brands need battery optimization or autostart allowed."
         ]
       }
     ]
@@ -201,8 +261,7 @@ export const devlog = [
         "items": [
           "Rebranded from Minirinth to Minirynth after Modrinth staff flagged the \"rinth\" part of the name.",
           "App name, Android package, User-Agent and storage keys now use Minirynth.",
-          "Added \"Formerly Minirinth\" to the README.",
-          "Every versioned APK is kept in `builds/`."
+          "Added \"Formerly Minirinth\" to the README."
         ]
       }
     ]
@@ -292,6 +351,6 @@ export const roadmap = [
   "Adding mods, resource packs, data packs, and so on to your Modrinth instance from Minirynth where ever you are. for example: you are having a vacation on a beach in Hawaii and for a random reason a thought popped in your head that you wanna add a mod to your Modrinth instance but you can't since your miles away from your pc, so you download Minirynth and just by a couple clicks of a button (i hope so) the mod is automatically added to your Modrinth instance. soo yea.. this one will be big and difficult (as far as i know), so this will be later on. (There is no specific date for this yet)",
   "Working with mobile Minecraft launchers like Mojo, so Minirynth can add things straight to the instance you actually play on. I want to support as many mobile launchers as I can, but I'm not promising a specific list or date yet.",
   "Managing servers from your phone. Adding mods, updating packs and keeping everything in sync while you are away from your pc. This is the one I want most, honestly.",
-  "Scheduling releases, collections, content disclosures and payouts.",
+  "Content disclosures and payouts.",
   "More to come i just don't know what.."
 ]
