@@ -221,6 +221,7 @@ body {
 .app-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: calc(var(--gap-md) + env(safe-area-inset-top)) var(--gap-md)
     calc(var(--dock-height) + var(--gap-xl) + env(safe-area-inset-bottom));
   padding-left: calc(var(--gap-md) + env(safe-area-inset-left));
@@ -4353,9 +4354,10 @@ body {
 
 .creator__intro-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 10px;
   margin-bottom: var(--gap-md);
 }
 
@@ -4852,8 +4854,16 @@ body {
 }
 
 .creator__filters .select-menu,
+.creator__intro-row .creator__search {
+  flex: 1 1 180px;
+  width: auto;
+  min-width: 140px;
+}
+
 .creator__intro-row .select-menu {
-  width: min(220px, 100%);
+  flex: 0 1 220px;
+  width: auto;
+  min-width: 150px;
 }
 
 .user-page__identity {
