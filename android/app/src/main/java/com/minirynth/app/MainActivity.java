@@ -14,7 +14,7 @@ public class MainActivity extends BridgeActivity {
 
         WebSettings settings = getBridge().getWebView().getSettings();
         settings.setUserAgentString(
-            settings.getUserAgentString() + " Minirynth/0.5.4-dev (Unofficial mobile client for Modrinth)"
+            settings.getUserAgentString() + " Minirynth/0.5.6-dev (Unofficial mobile client for Modrinth)"
         );
     }
 }

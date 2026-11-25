@@ -84,7 +84,7 @@ addEventListener('checkNotifications', function (resolve, reject, args) {
       method: 'GET',
       headers: {
         Authorization: token,
-        'User-Agent': 'Minirynth/0.5.4-dev (Unofficial mobile client for Modrinth)',
+        'User-Agent': 'Minirynth/0.5.6-dev (Unofficial mobile client for Modrinth)',
       },
     })
       .then(function (response) {

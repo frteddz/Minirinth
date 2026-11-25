@@ -1,6 +1,6 @@
 const API_BASE_URL = 'https://api.modrinth.com/v2'
 const API_V3_BASE_URL = 'https://api.modrinth.com/v3'
-const USER_AGENT = 'Minirynth/0.5.4-dev (Unofficial mobile client for Modrinth)'
+const USER_AGENT = 'Minirynth/0.5.6-dev (Unofficial mobile client for Modrinth)'
 const CACHE_PREFIX = 'minirynth.cache.'
 const CACHE_TTL = 10 * 60 * 1000
 
