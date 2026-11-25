@@ -5,6 +5,37 @@ Every versioned APK stays in `builds/`
 
 The 0.4.x and 0.5.x builds are still for testing. 0.4.0 has not shipped.
 
+## 0.5.6 Patches - 2026-11-25
+
+### Fixed
+
+- Dashboard action row now wraps on narrow screens instead of pushing the page sideways. The app shell also blocks horizontal scroll.
+
+### Note
+
+- Follow-up after FoxyKid23256 tested 0.5.5-dev on the Galaxy S25 Ultra running Android 17 and sent a screenshot of the cut-off Dashboard.
+- Verified on the same device by the tester, who reported everything works. Issue #3 is closed.
+
+## 0.5.5-dev Patches - 2026-11-25
+
+### Improved
+
+- Buttons now snap to their pressed state instantly instead of animating the scale, to reduce input lag on Android 17.
+- Development site now has global search across releases and the roadmap, with `/` to focus and Esc to clear.
+- Added filter chips by release group and change category, plus a newest/oldest sort toggle. Search and filters live in the URL so a view can be bookmarked.
+- Releases are grouped by month, with a link and copy button for each release.
+- Added an APK table with every versioned build, its date and size, generated from `builds/`, plus a stats strip on the site.
+- Footer icons now glow on hover with their own colors: Ko-fi red, Modrinth green, Minirynth green and CurseForge orange.
+- Added a Report an issue section with a prefilled GitHub issue link and a short guide on what to include.
+- Added an Open bugs section generated from the repo's open GitHub issues at build time, with the last good copy kept if the fetch fails.
+
+### Note
+
+- Version bump to `0.5.5-dev` with `versionCode` 18. All hardcoded User-Agent strings match the new build.
+- Issue #3 is in progress: slight, intermittent input lag on a Galaxy S25 Ultra (SM-S947U, T-Mobile) running Android 17 / One UI 9.0, build CP2A.260605.016.S947USQS6BZK4. Android 16 runs flawlessly, so the cause looks specific to Android 17 / One UI 9 on that device.
+- FoxyKid23256 is the tester for this fix. GitHub would not accept them as an assignee because they are not a repo collaborator, so the assignment is tracked in the issue instead.
+- The button change is a first attempt, not a confirmed fix. Issue #3 stays open until the tester confirms it on the affected device.
+
 ## 0.5.4-dev The Anywhere Update - 2026-11-23
 
 ### Fixed

@@ -6,7 +6,7 @@ Unofficial mobile port for Modrinth. Browse mods, resource packs, shaders, data 
 
 Vue 3, TypeScript and Vite, wrapped for Android with Capacitor. Powered by the [Modrinth API](https://modrinth.com), not affiliated with Modrinth.
 
-Current build: v0.5.4-dev The Anywhere Update.
+Current build: v0.5.6 Patches.
 
 ## Contents
 

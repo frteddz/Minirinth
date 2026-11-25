@@ -4,7 +4,8 @@ Minirynth is an unofficial mobile client for Modrinth. This file records the cur
 
 ## Version plan
 
-- `0.5.4-dev The Anywhere Update` is the current development line.
+- `0.5.6 Patches` is the current development line.
+- `0.5.5-dev Patches` is the previous patch line and stays in the devlog.
 - Patch releases stay `-dev` while features are being tested.
 - `1.0.0` is the first stable release, used only when the features are ready for normal users.
 - Android `versionCode` increments for every versioned build.
@@ -23,10 +24,21 @@ For every feature slice:
 2. Update the feature list and current build in `README.md`.
 3. Update the version string in `src/views/SettingsView.vue`.
 4. Update `package.json` and `android/app/build.gradle` when the version changes.
-5. Run `npm run build:site` so the website picks up the new changelog and roadmap text.
+5. Run `npm run build:site` so the website picks up the new changelog, roadmap, APK list and stats.
 6. Update this file when a feature's status or constraints change.
 
 ## Feature status
+
+### Android 17 input lag
+
+Status: fixed and verified in `0.5.6 Patches`. Issue #3 is closed.
+
+- Slight, intermittent input lag on a Galaxy S25 Ultra (SM-S947U, T-Mobile) running Android 17 / One UI 9.0, build CP2A.260605.016.S947USQS6BZK4.
+- The whole UI feels unresponsive at times, with a short delay on some button taps.
+- Android 16 runs flawlessly, so this looks specific to Android 17 / One UI 9 rather than the app in general.
+- FoxyKid23256 is the tester on the affected device. Any fix gets verified there before it ships.
+- A read-only audit ruled out the viewport tag, `touch-action`, global transitions and heavy click handlers.
+- First attempt landed in `0.5.5-dev`: buttons snap to their pressed state instead of animating the scale. Not yet verified on the affected device.
 
 ### Scheduled releases
 

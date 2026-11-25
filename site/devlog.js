@@ -1,7 +1,51 @@
 export const devlog = [
   {
+    "id": "0-5-6-patches",
+    "version": "0.5.6 Patches",
+    "date": "2026-11-25",
+    "categories": [
+      "Fixed"
+    ],
+    "groups": [
+      {
+        "title": "Fixed",
+        "items": [
+          "Dashboard action row now wraps on narrow screens instead of pushing the page sideways. The app shell also blocks horizontal scroll."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "0-5-5-dev-patches",
+    "version": "0.5.5-dev Patches",
+    "date": "2026-11-25",
+    "categories": [
+      "Improved"
+    ],
+    "groups": [
+      {
+        "title": "Improved",
+        "items": [
+          "Buttons now snap to their pressed state instantly instead of animating the scale, to reduce input lag on Android 17.",
+          "Development site now has global search across releases and the roadmap, with `/` to focus and Esc to clear.",
+          "Added filter chips by release group and change category, plus a newest/oldest sort toggle. Search and filters live in the URL so a view can be bookmarked.",
+          "Releases are grouped by month, with a link and copy button for each release.",
+          "Added an APK table with every versioned build, its date and size, generated from `builds/`, plus a stats strip on the site.",
+          "Footer icons now glow on hover with their own colors: Ko-fi red, Modrinth green, Minirynth green and CurseForge orange.",
+          "Added a Report an issue section with a prefilled GitHub issue link and a short guide on what to include.",
+          "Added an Open bugs section generated from the repo's open GitHub issues at build time, with the last good copy kept if the fetch fails."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "0-5-4-dev-the-anywhere-update",
     "version": "0.5.4-dev The Anywhere Update",
     "date": "2026-11-23",
+    "categories": [
+      "Fixed",
+      "Improved"
+    ],
     "groups": [
       {
         "title": "Fixed",
@@ -21,8 +65,13 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-5-3-dev-the-anywhere-update",
     "version": "0.5.3-dev The Anywhere Update",
     "date": "2026-11-23",
+    "categories": [
+      "Added",
+      "Fixed"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -60,8 +109,12 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-5-0-dev-the-anywhere-update",
     "version": "0.5.0-dev The Anywhere Update",
     "date": "2026-11-23",
+    "categories": [
+      "Added"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -74,8 +127,12 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-4-7-dev-the-creator-tools-update",
     "version": "0.4.7-dev The Creator Tools Update",
     "date": "2026-11-23",
+    "categories": [
+      "Added"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -96,8 +153,12 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-4-6-dev-the-creator-tools-update",
     "version": "0.4.6-dev The Creator Tools Update",
     "date": "2026-11-23",
+    "categories": [
+      "Added"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -124,8 +185,12 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-4-5-dev-the-creator-tools-update",
     "version": "0.4.5-dev The Creator Tools Update",
     "date": "2026-11-23",
+    "categories": [
+      "Added"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -138,8 +203,13 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-4-4-dev-the-creator-tools-update",
     "version": "0.4.4-dev The Creator Tools Update",
     "date": "2026-11-22",
+    "categories": [
+      "Added",
+      "Changed"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -156,8 +226,13 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-4-3-dev-the-creator-tools-update",
     "version": "0.4.3-dev The Creator Tools Update",
     "date": "2026-11-22",
+    "categories": [
+      "Added",
+      "Changed"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -176,8 +251,12 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-4-2-dev-the-creator-tools-update",
     "version": "0.4.2-dev The Creator Tools Update",
     "date": "2026-11-22",
+    "categories": [
+      "Added"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -189,8 +268,12 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-4-1-dev-the-creator-tools-update",
     "version": "0.4.1-dev The Creator Tools Update",
     "date": "2026-11-22",
+    "categories": [
+      "Fixed"
+    ],
     "groups": [
       {
         "title": "Fixed",
@@ -201,8 +284,12 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-4-0-dev-the-creator-tools-update",
     "version": "0.4.0-dev The Creator Tools Update",
     "date": "2026-11-22",
+    "categories": [
+      "Added"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -216,8 +303,14 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-3-0-dev-the-creator-update",
     "version": "0.3.0-dev The Creator Update",
     "date": "2026-11-22",
+    "categories": [
+      "Added",
+      "Fixed",
+      "Improved"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -255,8 +348,12 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-2-1-dev",
     "version": "0.2.1-dev",
     "date": "2026-11-22",
+    "categories": [
+      "Changed"
+    ],
     "groups": [
       {
         "title": "Changed",
@@ -269,8 +366,15 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-2-0-dev",
     "version": "0.2.0-dev",
     "date": "2026-11-22",
+    "categories": [
+      "Added",
+      "Fixed",
+      "Changed",
+      "Removed"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -312,8 +416,12 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-1-2-dev",
     "version": "0.1.2-dev",
     "date": "2026-11-21",
+    "categories": [
+      "Added"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -324,8 +432,12 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-1-1-dev",
     "version": "0.1.1-dev",
     "date": "2026-11-21",
+    "categories": [
+      "Added"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -336,8 +448,12 @@ export const devlog = [
     ]
   },
   {
+    "id": "0-1-0-dev",
     "version": "0.1.0-dev",
     "date": "2026-11-21",
+    "categories": [
+      "Added"
+    ],
     "groups": [
       {
         "title": "Added",
@@ -356,3 +472,199 @@ export const roadmap = [
   "Content disclosures and payouts.",
   "More to come i just don't know what.."
 ]
+
+export const apks = [
+  {
+    "name": "Minirynth-v0.5.6-dev.apk",
+    "version": "0.5.6-dev",
+    "variant": "",
+    "size": 20299966,
+    "date": "2026-11-25",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.5.6-dev/Minirynth-v0.5.6-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.5.6-dev"
+  },
+  {
+    "name": "Minirynth-v0.5.5-dev.apk",
+    "version": "0.5.5-dev",
+    "variant": "",
+    "size": 20492169,
+    "date": "2026-11-25",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.5.5-dev/Minirynth-v0.5.5-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.5.5-dev"
+  },
+  {
+    "name": "Minirynth-v0.5.4-dev.apk",
+    "version": "0.5.4-dev",
+    "variant": "",
+    "size": 19098401,
+    "date": "2026-11-23",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.5.4-dev/Minirynth-v0.5.4-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.5.4-dev"
+  },
+  {
+    "name": "Minirynth-v0.5.3-dev.apk",
+    "version": "0.5.3-dev",
+    "variant": "",
+    "size": 19098233,
+    "date": "2026-11-23",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.5.3-dev/Minirynth-v0.5.3-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.5.3-dev"
+  },
+  {
+    "name": "Minirynth-v0.5.0-dev-launcher-folders.apk",
+    "version": "0.5.0-dev",
+    "variant": "launcher-folders",
+    "size": 19091773,
+    "date": "2026-11-23",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.5.0-dev/Minirynth-v0.5.0-dev-launcher-folders.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.5.0-dev"
+  },
+  {
+    "name": "Minirynth-v0.5.0-dev-schedules-only.apk",
+    "version": "0.5.0-dev",
+    "variant": "schedules-only",
+    "size": 20393804,
+    "date": "2026-11-23",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.5.0-dev/Minirynth-v0.5.0-dev-schedules-only.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.5.0-dev"
+  },
+  {
+    "name": "Minirynth-v0.5.0-dev.apk",
+    "version": "0.5.0-dev",
+    "variant": "",
+    "size": 20394343,
+    "date": "2026-11-23",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.5.0-dev/Minirynth-v0.5.0-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.5.0-dev"
+  },
+  {
+    "name": "Minirynth-v0.4.7-dev.apk",
+    "version": "0.4.7-dev",
+    "variant": "",
+    "size": 19087697,
+    "date": "2026-11-22",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.4.7-dev/Minirynth-v0.4.7-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.4.7-dev"
+  },
+  {
+    "name": "Minirynth-v0.4.5-dev.apk",
+    "version": "0.4.5-dev",
+    "variant": "",
+    "size": 19078029,
+    "date": "2026-11-22",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.4.5-dev/Minirynth-v0.4.5-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.4.5-dev"
+  },
+  {
+    "name": "Minirynth-v0.4.4-dev.apk",
+    "version": "0.4.4-dev",
+    "variant": "",
+    "size": 19075929,
+    "date": "2026-11-22",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.4.4-dev/Minirynth-v0.4.4-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.4.4-dev"
+  },
+  {
+    "name": "Minirynth-v0.4.3-dev.apk",
+    "version": "0.4.3-dev",
+    "variant": "",
+    "size": 19072805,
+    "date": "2026-11-22",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.4.3-dev/Minirynth-v0.4.3-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.4.3-dev"
+  },
+  {
+    "name": "Minirynth-v0.4.2-dev.apk",
+    "version": "0.4.2-dev",
+    "variant": "",
+    "size": 15007397,
+    "date": "2026-11-22",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.4.2-dev/Minirynth-v0.4.2-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.4.2-dev"
+  },
+  {
+    "name": "Minirynth-v0.4.1-dev.apk",
+    "version": "0.4.1-dev",
+    "variant": "",
+    "size": 15007261,
+    "date": "2026-11-22",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.4.1-dev/Minirynth-v0.4.1-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.4.1-dev"
+  },
+  {
+    "name": "Minirynth-v0.4.0-dev.apk",
+    "version": "0.4.0-dev",
+    "variant": "",
+    "size": 14999061,
+    "date": "2026-11-22",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.4.0-dev/Minirynth-v0.4.0-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.4.0-dev"
+  },
+  {
+    "name": "Minirynth-v0.3.0-dev.apk",
+    "version": "0.3.0-dev",
+    "variant": "",
+    "size": 8017750,
+    "date": "2026-11-22",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.3.0-dev/Minirynth-v0.3.0-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.3.0-dev"
+  },
+  {
+    "name": "Minirynth-v0.2.1-dev.apk",
+    "version": "0.2.1-dev",
+    "variant": "",
+    "size": 8915799,
+    "date": "2026-11-22",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.2.1-dev/Minirynth-v0.2.1-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.2.1-dev"
+  },
+  {
+    "name": "Minirynth-v0.2.0-dev.apk",
+    "version": "0.2.0-dev",
+    "variant": "",
+    "size": 8915807,
+    "date": "2026-11-22",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.2.0-dev/Minirynth-v0.2.0-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.2.0-dev"
+  },
+  {
+    "name": "Minirynth-v0.1.2-dev.apk",
+    "version": "0.1.2-dev",
+    "variant": "",
+    "size": 4858341,
+    "date": "2026-11-22",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.1.2-dev/Minirynth-v0.1.2-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.1.2-dev"
+  },
+  {
+    "name": "Minirynth-v0.1.1-dev.apk",
+    "version": "0.1.1-dev",
+    "variant": "",
+    "size": 4779706,
+    "date": "2026-11-22",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.1.1-dev/Minirynth-v0.1.1-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.1.1-dev"
+  },
+  {
+    "name": "Minirynth-v0.1.0-dev.apk",
+    "version": "0.1.0-dev",
+    "variant": "",
+    "size": 4782098,
+    "date": "2026-11-22",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.1.0-dev/Minirynth-v0.1.0-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.1.0-dev"
+  }
+]
+
+export const stats = {
+  "releases": 19,
+  "latest": "0.5.6 Patches",
+  "categories": [
+    "Added",
+    "Changed",
+    "Fixed",
+    "Improved",
+    "Removed"
+  ],
+  "apks": 20
+}
