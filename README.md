@@ -72,6 +72,7 @@ Prebuilt Android APKs are on the [releases page](https://github.com/frteddz/Mini
 [![Modrinth](https://raw.githubusercontent.com/frteddz/pixel-icons-library-/main/96x/modrinth_icon_bg.png)](https://modrinth.com/user/teddz)
 [![Development](https://raw.githubusercontent.com/frteddz/Minirynth/refs/heads/main/assets/minirynth/badges/minirynth-pixel-icon-dark-96x96.png)](https://development.minirynth.pages.dev)
 [![CurseForge](https://raw.githubusercontent.com/frteddz/pixel-icons-library-/main/96x/cruseforge_icon_bg.png)](https://www.curseforge.com/members/teddz/)
+[![Discord](https://github.com/frteddz/pixel-icons-library-/blob/main/96x/discord_icon_bg.png?raw=true)](https://discord.gg/64YeNywuXp)
 
  **Minirynth is built by a single developer. if you’d like to support the project, you can [donate here](https://ko-fi.com/majdsafi).**
 </div>
