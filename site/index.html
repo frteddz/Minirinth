@@ -17,7 +17,9 @@
         <a href="#devlog">Devlog</a>
         <a href="#roadmap">Roadmap</a>
         <a href="#updates">Updates</a>
-        <a href="https://github.com/frteddz/Minirynth/releases">APKs</a>
+        <a href="#apks">APKs</a>
+        <a href="#bugs">Bugs</a>
+        <a href="#issues">Issues</a>
       </nav>
     </header>
 
@@ -33,7 +35,8 @@
           <a class="button primary" href="#devlog">Read the devlog</a>
           <a class="button" href="https://github.com/frteddz/Minirynth/releases">Get the latest APK</a>
         </div>
-        <p class="build">Current build: <strong>0.5.4-dev The Anywhere Update</strong></p>
+        <p class="build">Current build: <strong>0.5.6 Patches</strong></p>
+        <div class="stats" id="stats-list" aria-label="Site statistics"></div>
       </section>
 
       <section class="section" id="devlog">
@@ -43,24 +46,16 @@
         </div>
         <div class="devlog-tools">
           <input
-            id="devlog-search"
+            id="search"
             class="devlog-search"
             type="search"
-            placeholder="Search the devlog"
-            aria-label="Search the devlog"
+            placeholder="Search releases and roadmap. Press / to focus"
+            aria-label="Search releases and roadmap"
           />
-          <div class="devlog-filter">
-            <button
-              id="devlog-filter-button"
-              class="devlog-filter__button"
-              type="button"
-              aria-expanded="false"
-            >
-              Filter <span id="devlog-filter-label">All</span>
-            </button>
-            <div class="devlog-filter__menu" id="devlog-filter-menu" hidden></div>
-          </div>
+          <button id="devlog-sort" class="sort-button" type="button">Newest first</button>
         </div>
+        <div class="devlog-chips" id="devlog-chips" aria-label="Filter releases"></div>
+        <p class="devlog-summary" id="devlog-summary"></p>
         <div class="entries" id="devlog-list"></div>
       </section>
 
@@ -78,6 +73,70 @@
             target="_blank"
             rel="noreferrer"
             >Send an idea</a
+          >
+        </div>
+      </section>
+
+      <section class="section alt" id="apks">
+        <div class="section-head">
+          <h2>APKs</h2>
+          <p>Every versioned build, kept here.</p>
+        </div>
+        <div class="apk-table" id="apk-list"></div>
+        <p class="apk-note">
+          Builds ship on the <a href="https://github.com/frteddz/Minirynth/releases">releases page</a>.
+          Debug APKs, sideload to install.
+        </p>
+      </section>
+
+      <section class="section alt" id="bugs">
+        <div class="section-head">
+          <h2>Open bugs</h2>
+          <p>Known issues still being worked on, straight from GitHub.</p>
+        </div>
+        <div class="bug-list" id="bug-list"></div>
+        <p class="bug-note">
+          See something that is not listed? <a href="#issues">Report an issue</a>.
+        </p>
+      </section>
+
+      <section class="section" id="issues">
+        <div class="section-head">
+          <h2>Report an issue</h2>
+          <p>Found a bug or something that feels off? Open an issue on GitHub.</p>
+        </div>
+        <div class="issue-grid">
+          <div class="issue-card">
+            <h3>What to include</h3>
+            <ul>
+              <li>The build version from Settings.</li>
+              <li>Your device and Android version.</li>
+              <li>Steps to reproduce, if you can.</li>
+              <li>What you expected to happen.</li>
+            </ul>
+          </div>
+          <div class="issue-card">
+            <h3>What happens next</h3>
+            <p>
+              Issues are tracked in the open on GitHub. Clear reports get verified on the affected
+              device before a fix ships.
+            </p>
+          </div>
+        </div>
+        <div class="issue-actions">
+          <a
+            class="button primary"
+            href="https://github.com/frteddz/Minirynth/issues/new?title=%5BBug%5D%20&body=What%20happened%3F%3A%0A%0AWhat%20did%20you%20expect%20to%20happen%3F%3A%0A%0ASteps%20to%20reproduce%3A%0A1.%0A%0ABuild%20version%3A%0ADevice%20and%20Android%20version%3A%0A%0AAnything%20else%3F%3A%0A"
+            target="_blank"
+            rel="noreferrer"
+            >Open an issue</a
+          >
+          <a
+            class="button"
+            href="https://github.com/frteddz/Minirynth/issues"
+            target="_blank"
+            rel="noreferrer"
+            >Browse open issues</a
           >
         </div>
       </section>
@@ -124,25 +183,25 @@
         <a href="https://modrinth.com">Modrinth API</a>. Not affiliated with Modrinth.
       </p>
       <div class="site-footer__icons">
-        <a href="https://ko-fi.com/majdsafi" target="_blank" rel="noreferrer">
+        <a class="footer-icon footer-icon--kofi" href="https://ko-fi.com/majdsafi" target="_blank" rel="noreferrer">
           <img
             src="https://raw.githubusercontent.com/frteddz/pixel-icons-library-/main/96x/kofi_icon_bg.png"
             alt="Ko-fi"
           />
         </a>
-        <a href="https://modrinth.com/user/teddz" target="_blank" rel="noreferrer">
+        <a class="footer-icon footer-icon--modrinth" href="https://modrinth.com/user/teddz" target="_blank" rel="noreferrer">
           <img
             src="https://raw.githubusercontent.com/frteddz/pixel-icons-library-/main/96x/modrinth_icon_bg.png"
             alt="Modrinth"
           />
         </a>
-        <a href="https://github.com/frteddz/Minirynth" target="_blank" rel="noreferrer">
+        <a class="footer-icon footer-icon--minirynth" href="https://github.com/frteddz/Minirynth" target="_blank" rel="noreferrer">
           <img
             src="https://raw.githubusercontent.com/frteddz/Minirynth/refs/heads/main/assets/minirynth/badges/minirynth-pixel-icon-dark-96x96.png"
             alt="Repo"
           />
         </a>
-        <a href="https://www.curseforge.com/members/teddz/" target="_blank" rel="noreferrer">
+        <a class="footer-icon footer-icon--curseforge" href="https://www.curseforge.com/members/teddz/" target="_blank" rel="noreferrer">
           <img
             src="https://raw.githubusercontent.com/frteddz/pixel-icons-library-/main/96x/cruseforge_icon_bg.png"
             alt="CurseForge"
