@@ -1,5 +1,33 @@
 export const devlog = [
   {
+    "id": "0-5-7-the-control-update",
+    "version": "0.5.7 The Control Update",
+    "date": "2026-11-27",
+    "categories": [
+      "Improved",
+      "Added"
+    ],
+    "groups": [
+      {
+        "title": "Improved",
+        "items": [
+          "Development site hero now uses the Minirynth banner image with a dark overlay."
+        ]
+      },
+      {
+        "title": "Added",
+        "items": [
+          "Browse cards now show a relative update time with the rotate-clock icon, like `1 day ago` or `3 weeks ago`.",
+          "Settings now saves default filters for each content category, and browsing applies them automatically.",
+          "Categories now have a display mode button with Cards and Showcase modes. Showcase uses a project's featured image, falls back to a bundled image, and tints it with the project's logo color.",
+          "Added a Servers entry to the menu with your Modrinth Hosting servers, server details, worlds and power actions.",
+          "Each world now has a manager with installed content, addon search and install, backups, server properties and a link to the full file manager.",
+          "Project download dialogs now offer `Download to <server name>` for each Modrinth Hosting server, using the selected version and the server's active world."
+        ]
+      }
+    ]
+  },
+  {
     "id": "0-5-6-patches",
     "version": "0.5.6 Patches",
     "date": "2026-11-25",
@@ -468,7 +496,7 @@ export const devlog = [
 export const roadmap = [
   "Deeper support for mobile Minecraft launchers like Mojo. The Android folder picker works now, but I want to support as many launchers as I can, so I'm not promising a specific list or date yet.",
   "Official cloud sync for instances, if Modrinth ever exposes the API for it.",
-  "Managing servers from your phone. Adding mods, updating packs and keeping everything in sync while you are away from your pc. This is the one I want most, honestly.",
+  "Installing content straight into your hosting worlds from category pages, plus full in-app file management. This is the one I want most, honestly.",
   "Content disclosures and payouts.",
   "More to come i just don't know what.."
 ]
@@ -657,8 +685,8 @@ export const apks = [
 ]
 
 export const stats = {
-  "releases": 19,
-  "latest": "0.5.6 Patches",
+  "releases": 20,
+  "latest": "0.5.7 The Control Update",
   "categories": [
     "Added",
     "Changed",

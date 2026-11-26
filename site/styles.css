@@ -127,9 +127,17 @@ input:focus-visible {
 }
 
 .hero {
+  position: relative;
+  padding: 96px 24px 80px;
+  background: linear-gradient(180deg, rgba(10, 10, 10, 0.72), rgba(10, 10, 10, 0.86)),
+    url('./home-main.jpg') center / cover no-repeat;
+  border-bottom: 1px solid var(--surface-4);
+}
+
+.hero__inner {
+  position: relative;
   max-width: 1040px;
   margin: 0 auto;
-  padding: 96px 24px 80px;
 }
 
 .eyebrow {

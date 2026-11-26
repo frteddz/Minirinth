@@ -4,8 +4,8 @@ Minirynth is an unofficial mobile client for Modrinth. This file records the cur
 
 ## Version plan
 
-- `0.5.6 Patches` is the current development line.
-- `0.5.5-dev Patches` is the previous patch line and stays in the devlog.
+- `0.5.7 The Control Update` is the current development line.
+- `0.5.6 Patches` and `0.5.5-dev Patches` are the previous patch lines and stay in the devlog.
 - Patch releases stay `-dev` while features are being tested.
 - `1.0.0` is the first stable release, used only when the features are ready for normal users.
 - Android `versionCode` increments for every versioned build.
@@ -39,6 +39,28 @@ Status: fixed and verified in `0.5.6 Patches`. Issue #3 is closed.
 - FoxyKid23256 is the tester on the affected device. Any fix gets verified there before it ships.
 - A read-only audit ruled out the viewport tag, `touch-action`, global transitions and heavy click handlers.
 - First attempt landed in `0.5.5-dev`: buttons snap to their pressed state instead of animating the scale. Not yet verified on the affected device.
+
+### Browsing controls
+
+Status: in progress for `0.5.7 The Control Update`.
+
+- Browse cards show a relative update time with a rotate-clock icon.
+- Saved default filters can be set in Settings for each content category and apply automatically while browsing.
+- Cards and Showcase display modes are in, with the mode saved on the device.
+- Server managing is planned next.
+
+### Modrinth Hosting
+
+Status: first slice shipped in `0.5.7 The Control Update`.
+
+- The menu has a Servers page that lists your Modrinth Hosting servers.
+- A server page shows specs, region, worlds and power actions through Modrinth's Archon API.
+- Archon is used by Modrinth's own site and is not in the public API docs, so endpoints may change.
+- Minirynth never launches Minecraft itself. Power actions go through Modrinth.
+- World manager shows loader, content files, backups and server properties. Addons can be searched and installed from Modrinth inside it.
+- Full file editing opens on modrinth.com for now because it runs through Modrinth's node-backed file manager.
+- Project download dialogs offer a `Download to <server name>` action for each hosting server.
+- Installing content straight from category pages and native file management are next.
 
 ### Scheduled releases
 

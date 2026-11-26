@@ -6,7 +6,7 @@ Unofficial mobile port for Modrinth. Browse mods, resource packs, shaders, data 
 
 Vue 3, TypeScript and Vite, wrapped for Android with Capacitor. Powered by the [Modrinth API](https://modrinth.com), not affiliated with Modrinth.
 
-Current build: v0.5.6 Patches.
+Current build: v0.5.7 The Control Update.
 
 ## Contents
 
@@ -21,6 +21,9 @@ Current build: v0.5.6 Patches.
 
 - Browse mods, shaders, resource packs, data packs, modpacks and plugins with real API results, plus a Feeling Lucky button.
 - Search by title, author, description or slug, then narrow things down with filters, sorting and pagination.
+- Save default filters for each content category in Settings. They load automatically when you browse that category.
+- Switch between Cards and Showcase display modes while browsing. Showcase uses the project's featured image, or a bundled image if there is none.
+- View your Modrinth Hosting servers from the menu, check their worlds and use power actions. World manager handles content, backups and server properties. Project downloads can install straight into a hosting server. Minirynth never launches Minecraft itself.
 - Open a project to see its description, tags, versions, gallery and external links. The gallery viewer supports swiping, next and previous, captions and image downloads.
 - Project pages use type based links like `/mod/fabric-api` and `/shader/sodium`.
 - Sign in with your Modrinth account through OAuth. A personal access token still works as a fallback, and you can save a few accounts and switch between them without signing out.
@@ -40,7 +43,7 @@ Current build: v0.5.6 Patches.
 
 - Deeper support for mobile Minecraft launchers like Mojo. The Android folder picker works now, but I want to support as many launchers as I can, so I'm not promising a specific list or date yet.
 - Official cloud sync for instances, if Modrinth ever exposes the API for it.
-- Managing servers from your phone. Adding mods, updating packs and keeping everything in sync while you are away from your pc. This is the one I want most, honestly.
+- Installing content straight into your hosting worlds from category pages, plus full in-app file management. This is the one I want most, honestly.
 - Content disclosures and payouts.
 - More to come i just don't know what..
 

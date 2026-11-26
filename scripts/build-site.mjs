@@ -178,6 +178,7 @@ writeFileSync(
 
 copyFileSync(new URL('assets/minirynth/svg/minirynth-lockup.svg', root), new URL('logo.svg', out))
 copyFileSync(new URL('assets/minirynth/svg/minirynth-icon.svg', root), new URL('icon.svg', out))
+copyFileSync(new URL('assets/Images/home-main.jpg', root), new URL('home-main.jpg', out))
 
 console.log(
   `Wrote ${devlog.length} devlog entries, ${roadmap.length} roadmap items and ${apks.length} APKs to site/`,

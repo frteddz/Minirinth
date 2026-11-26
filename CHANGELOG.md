@@ -5,6 +5,29 @@ Every versioned APK stays in `builds/`
 
 The 0.4.x and 0.5.x builds are still for testing. 0.4.0 has not shipped.
 
+## 0.5.7 The Control Update - 2026-11-27
+
+### Improved
+
+- Development site hero now uses the Minirynth banner image with a dark overlay.
+
+### Added
+
+- Browse cards now show a relative update time with the rotate-clock icon, like `1 day ago` or `3 weeks ago`.
+- Settings now saves default filters for each content category, and browsing applies them automatically.
+- Categories now have a display mode button with Cards and Showcase modes. Showcase uses a project's featured image, falls back to a bundled image, and tints it with the project's logo color.
+- Added a Servers entry to the menu with your Modrinth Hosting servers, server details, worlds and power actions.
+- Each world now has a manager with installed content, addon search and install, backups, server properties and a link to the full file manager.
+- Project download dialogs now offer `Download to <server name>` for each Modrinth Hosting server, using the selected version and the server's active world.
+
+### Note
+
+- Version bump to `0.5.7-dev` with `versionCode` 20. All hardcoded User-Agent strings match the new build.
+- Default filters and the chosen display mode are stored on the device, separate from the global advanced exclusions.
+- Hosting uses Modrinth's Archon API with your OAuth token. It is not in the public API docs, so it may change.
+- Full file editing still opens on modrinth.com because it runs through Modrinth's node-backed file manager.
+- Minirynth never launches Minecraft itself. Hosting actions go through Modrinth's own API.
+
 ## 0.5.6 Patches - 2026-11-25
 
 ### Fixed
