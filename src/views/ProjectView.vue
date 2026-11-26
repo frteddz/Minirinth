@@ -55,6 +55,12 @@ import { useLauncherFolders } from '../composables/useLauncherFolders'
 import { useInstalledContent } from '../composables/useInstalledContent'
 import { isNativeLauncherFolders, writeFileNative } from '../plugins/launcher-folders'
 import type { ContentFolder } from '../utils/launcher-folders'
+import {
+  addAddon,
+  listServers,
+  type AddonKind,
+  type ArchonServer,
+} from '../api/archon'
 
 const route = useRoute()
 const router = useRouter()
@@ -76,6 +82,11 @@ const selectedInstanceId = ref('')
 const instanceDownloading = ref(false)
 const instanceDownloadError = ref('')
 const instanceDownloadDone = ref(false)
+const hostingServers = ref<ArchonServer[]>([])
+const hostingLoading = ref(false)
+const hostingInstalling = ref('')
+const hostingError = ref('')
+const hostingDone = ref('')
 const collections = ref<Collection[]>([])
 const collectionsLoading = ref(false)
 const collectionOpen = ref(false)
@@ -292,6 +303,20 @@ const matchedVersion = computed(() =>
 
 const matchedFile = computed(() => matchedVersion.value?.files[0] ?? null)
 
+const hostingKind = computed<AddonKind | null>(() => {
+  const type = project.value?.project_type ?? ''
+  const map: Record<string, AddonKind> = {
+    mod: 'mod',
+    plugin: 'plugin',
+    datapack: 'datapack',
+    'data-pack': 'datapack',
+    shader: 'shader',
+    resourcepack: 'resourcepack',
+    'resource-pack': 'resourcepack',
+  }
+  return map[type] ?? null
+})
+
 function contentFolderForProject(type: string): ContentFolder | null {
   if (type === 'mod') return 'mods'
   if (type === 'resource-pack') return 'resourcepacks'
@@ -478,6 +503,53 @@ function openDownload() {
   instanceDownloadError.value = ''
   instanceDownloadDone.value = false
   downloadOpen.value = true
+  void loadHostingServers()
+}
+
+async function loadHostingServers() {
+  hostingServers.value = []
+  hostingError.value = ''
+  hostingDone.value = ''
+  if (!user.value || !hostingKind.value) return
+
+  hostingLoading.value = true
+  try {
+    hostingServers.value = await listServers()
+  } catch {
+    hostingServers.value = []
+  } finally {
+    hostingLoading.value = false
+  }
+}
+
+function targetWorld(server: ArchonServer) {
+  return server.worlds.find((world) => world.is_active) ?? server.worlds[0] ?? null
+}
+
+async function installToServer(server: ArchonServer) {
+  const version = matchedVersion.value
+  const kind = hostingKind.value
+  const world = targetWorld(server)
+  if (!project.value || !version || !kind || !world) {
+    hostingError.value = 'No matching version or world to install into.'
+    return
+  }
+
+  hostingInstalling.value = server.id
+  hostingError.value = ''
+  hostingDone.value = ''
+  try {
+    await addAddon(server.id, world.id, {
+      project_id: project.value.id,
+      version_id: version.id,
+      kind,
+    })
+    hostingDone.value = `Added to ${server.name} (${world.name}).`
+  } catch (cause) {
+    hostingError.value = cause instanceof Error ? cause.message : 'Could not install to that server.'
+  } finally {
+    hostingInstalling.value = ''
+  }
 }
 
 async function downloadToInstance() {
@@ -1152,6 +1224,35 @@ onMounted(load)
                 <p v-if="instanceDownloadDone" class="download-dialog__done">
                   Saved to {{ targetFolderName }}.
                 </p>
+              </div>
+
+              <div v-if="hostingKind && user" class="download-dialog__instance">
+                <p class="download-dialog__label">Download to Modrinth Hosting</p>
+                <p v-if="hostingLoading" class="download-dialog__hint">Loading servers...</p>
+                <p v-else-if="hostingServers.length === 0" class="download-dialog__empty">
+                  No hosting servers on this account.
+                </p>
+                <div v-for="server in hostingServers" :key="server.id" class="download-dialog__hosting">
+                  <button
+                    type="button"
+                    class="download-dialog__button"
+                    :disabled="!!hostingInstalling || !matchedVersion || !targetWorld(server)"
+                    :title="targetWorld(server) ? `Installs into ${targetWorld(server)?.name}` : 'No worlds on this server'"
+                    @click="installToServer(server)"
+                  >
+                    <span class="project-page__action-icon" aria-hidden="true" v-html="downloadIcon"></span>
+                    {{
+                      hostingInstalling === server.id
+                        ? 'Installing...'
+                        : `Download to ${server.name}`
+                    }}
+                  </button>
+                  <span v-if="targetWorld(server)" class="download-dialog__hint">
+                    World: {{ targetWorld(server)?.name }}
+                  </span>
+                </div>
+                <p v-if="hostingError" class="download-dialog__error">{{ hostingError }}</p>
+                <p v-if="hostingDone" class="download-dialog__done">{{ hostingDone }}</p>
               </div>
             </div>
           </div>
