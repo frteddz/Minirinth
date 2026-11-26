@@ -5,6 +5,9 @@ import SearchView from '../views/SearchView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import LoginView from '../views/LoginView.vue'
 import SettingsView from '../views/SettingsView.vue'
+import ServersView from '../views/ServersView.vue'
+import ServerView from '../views/ServerView.vue'
+import ServerWorldView from '../views/ServerWorldView.vue'
 import LauncherFoldersView from '../views/LauncherFoldersView.vue'
 import CollectionsView from '../views/CollectionsView.vue'
 import CollectionView from '../views/CollectionView.vue'
@@ -31,6 +34,9 @@ const router = createRouter({
     { path: '/login', name: 'login', component: LoginView },
     { path: '/oauth/callback', name: 'oauth-callback', component: OAuthCallbackView },
     { path: '/settings', name: 'settings', component: SettingsView },
+    { path: '/servers', name: 'servers', component: ServersView },
+    { path: '/servers/:id', name: 'server', component: ServerView },
+    { path: '/servers/:id/worlds/:worldId', name: 'server-world', component: ServerWorldView },
     { path: '/launcher-folders', name: 'launcher-folders', component: LauncherFoldersView },
     { path: '/collections', name: 'collections', component: CollectionsView },
     { path: '/collections/:id', name: 'collection', component: CollectionView },
