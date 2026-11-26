@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onUnmounted, ref, watch } from 'vue'
 import Card from '../ui/components/Card.vue'
+import SavedFiltersEditor from '../components/SavedFiltersEditor.vue'
 import { useTheme } from '../composables/useTheme'
 import { useNotificationSettings } from '../composables/useNotificationSettings'
 import pkg from '../../package.json'
@@ -126,6 +127,11 @@ onUnmounted(() => {
             </svg>
           </button>
         </div>
+      </div>
+
+      <div id="default-filters" class="settings__section">
+        <h2 class="settings__heading">Default filters</h2>
+        <SavedFiltersEditor />
       </div>
 
       <div class="settings__section">

@@ -1,6 +1,7 @@
 import { reactive, ref, watch } from 'vue'
 
 const STORAGE_KEY = 'minirynth.advanced-exclusions'
+const DEFAULTS_STORAGE_KEY = 'minirynth.default-filters'
 
 export type SelectionGroup =
   | 'categories'
@@ -43,6 +44,54 @@ export interface FilterState {
   exclusions: string[]
 }
 
+export type SavedFilterState = Omit<FilterState, 'exclusions' | 'versionQuery'>
+
+export function createEmptyFilters(): SavedFilterState {
+  return {
+    categories: [],
+    features: [],
+    performance: [],
+    resolution: [],
+    loaders: [],
+    platforms: [],
+    dependencies: [],
+    environments: [],
+    excluded: {
+      categories: [],
+      features: [],
+      performance: [],
+      resolution: [],
+      loaders: [],
+      platforms: [],
+      dependencies: [],
+      environments: [],
+    },
+    showAllLoaders: false,
+    showAllVersions: false,
+    versions: [],
+    openSourceOnly: false,
+  }
+}
+
+function normalizeSaved(value: SavedFilterState | undefined): SavedFilterState {
+  const base = createEmptyFilters()
+  if (!value) return base
+  return {
+    ...base,
+    ...value,
+    excluded: { ...base.excluded, ...value.excluded },
+  }
+}
+
+function loadDefaults(): Record<string, SavedFilterState> {
+  try {
+    const raw = localStorage.getItem(DEFAULTS_STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as Record<string, SavedFilterState>) : {}
+  } catch {
+    return {}
+  }
+}
+
 function loadExclusions(): string[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -53,6 +102,7 @@ function loadExclusions(): string[] {
 }
 
 const filterOpen = ref(false)
+const savedDefaults = ref<Record<string, SavedFilterState>>(loadDefaults())
 
 const state = reactive<FilterState>({
   categories: [],
@@ -95,20 +145,51 @@ function removeValue(list: string[], value: string) {
 }
 
 export function useCategoryFilters() {
-  function clearAll() {
-    const groups: SelectionGroup[] = [
-      'categories', 'features', 'performance', 'resolution',
-      'loaders', 'platforms', 'dependencies', 'environments',
-    ]
-    groups.forEach((group) => {
-      state[group] = []
-      state.excluded[group] = []
-    })
-    state.showAllLoaders = false
+  function getDefaults(path: string): SavedFilterState {
+    return normalizeSaved(savedDefaults.value[path])
+  }
+
+  function persistDefaults() {
+    localStorage.setItem(DEFAULTS_STORAGE_KEY, JSON.stringify(savedDefaults.value))
+  }
+
+  function saveDefaults(path: string, value: SavedFilterState) {
+    savedDefaults.value = { ...savedDefaults.value, [path]: normalizeSaved(value) }
+    persistDefaults()
+  }
+
+  function clearDefaults(path: string) {
+    const next = { ...savedDefaults.value }
+    delete next[path]
+    savedDefaults.value = next
+    persistDefaults()
+  }
+
+  function applyDefaults(path: string) {
+    const saved = getDefaults(path)
+    state.categories = [...saved.categories]
+    state.features = [...saved.features]
+    state.performance = [...saved.performance]
+    state.resolution = [...saved.resolution]
+    state.loaders = [...saved.loaders]
+    state.platforms = [...saved.platforms]
+    state.dependencies = [...saved.dependencies]
+    state.environments = [...saved.environments]
+    state.excluded = {
+      categories: [...saved.excluded.categories],
+      features: [...saved.excluded.features],
+      performance: [...saved.excluded.performance],
+      resolution: [...saved.excluded.resolution],
+      loaders: [...saved.excluded.loaders],
+      platforms: [...saved.excluded.platforms],
+      dependencies: [...saved.excluded.dependencies],
+      environments: [...saved.excluded.environments],
+    }
+    state.showAllLoaders = saved.showAllLoaders
     state.versionQuery = ''
-    state.showAllVersions = false
-    state.versions = []
-    state.openSourceOnly = false
+    state.showAllVersions = saved.showAllVersions
+    state.versions = [...saved.versions]
+    state.openSourceOnly = saved.openSourceOnly
   }
 
   function toggleSelection(group: SelectionGroup, value: string, kind: SelectionKind) {
@@ -141,7 +222,11 @@ export function useCategoryFilters() {
   return {
     state,
     filterOpen,
-    clearAll,
+    savedDefaults,
+    getDefaults,
+    saveDefaults,
+    clearDefaults,
+    applyDefaults,
     toggleSelection,
     selectionOf,
     toggleVersion,

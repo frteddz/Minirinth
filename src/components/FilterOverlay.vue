@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Ban, Check, X } from '@lucide/vue'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import FilterOptionRow from './FilterOptionRow.vue'
 import FilterSection from './FilterSection.vue'
 import {
@@ -48,6 +48,7 @@ onUnmounted(() => {
 })
 
 const route = useRoute()
+const router = useRouter()
 const isShader = computed(() => route.path === '/shaders')
 const isPack = computed(() => route.path === '/resource-packs')
 const isDataPack = computed(() => route.path === '/data-packs')
@@ -120,6 +121,15 @@ const visibleDependencies = computed(() => {
   const term = dependencyQuery.value.trim().toLowerCase()
   return pluginDependencies.filter((item) => item.toLowerCase().includes(term))
 })
+
+function goToDefaultFilters() {
+  closeFilter()
+  void router.push('/settings').then(() => {
+    requestAnimationFrame(() => {
+      document.getElementById('default-filters')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  })
+}
 </script>
 
 <template>
@@ -127,7 +137,12 @@ const visibleDependencies = computed(() => {
     <div v-if="filterOpen" class="overlay overlay--filter" @click.self="closeFilter">
       <div class="filter-sheet card" role="dialog" aria-modal="true" aria-label="Filters">
         <header class="filter-sheet__header">
-          <h2>Filters</h2>
+          <div class="filter-sheet__heading">
+            <h2>Filters</h2>
+            <button type="button" class="filter-sheet__hint" @click="goToDefaultFilters">
+              You can now set default filters!
+            </button>
+          </div>
           <button type="button" aria-label="Close filters" @click="closeFilter">
             <X :size="20" :stroke-width="2" />
           </button>
