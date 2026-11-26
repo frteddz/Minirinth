@@ -129,7 +129,7 @@ public class LauncherFoldersPlugin extends Plugin {
                 connection.setConnectTimeout(20000);
                 connection.setReadTimeout(60000);
                 connection.setInstanceFollowRedirects(true);
-                connection.setRequestProperty("User-Agent", "Minirynth/0.5.6-dev");
+                connection.setRequestProperty("User-Agent", "Minirynth/0.5.7-dev");
 
                 int status = connection.getResponseCode();
                 if (status < 200 || status >= 300) {
