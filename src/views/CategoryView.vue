@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronLeft, ChevronRight, Search, SlidersHorizontal } from '@lucide/vue'
+import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Card from '../ui/components/Card.vue'
@@ -7,16 +7,26 @@ import SelectMenu from '../components/SelectMenu.vue'
 import { categories } from '../data/categories'
 import { tagIconSvg, tagSlug } from '../data/tag-icons'
 import { useCategoryFilters } from '../composables/useCategoryFilters'
+import { useDisplayMode } from '../composables/useDisplayMode'
 import { projectPath } from '../utils/project-path'
+import { relativeTime } from '../utils/relative-time'
 import { userPath } from '../utils/user-path'
 import { searchProjects, type SearchHit } from '../api/client'
+import cardsIcon from '../assets/icons/cards.svg?raw'
 import downloadIcon from '../assets/icons/download.svg?raw'
 import heartIcon from '../assets/icons/heart.svg?raw'
+import searchIcon from '../assets/icons/search.svg?raw'
+import showcaseIcon from '../assets/icons/showcase.svg?raw'
+import slidersIcon from '../assets/icons/sliders-horizontal.svg?raw'
+import updatedIcon from '../assets/icons/updated.svg?raw'
+import fallbackImage from '../../assets/Images/home-main.jpg?url'
 
 const route = useRoute()
 const router = useRouter()
 const category = computed(() => categories.find((item) => item.path === route.path))
-const { state, openFilter, clearAll } = useCategoryFilters()
+const { state, openFilter, applyDefaults } = useCategoryFilters()
+const { mode: displayMode, cycle: cycleDisplay } = useDisplayMode()
+applyDefaults(route.path)
 
 const sorts = ['Relevance', 'Downloads', 'Follows', 'Newest', 'Recently Updated'] as const
 type Sort = (typeof sorts)[number]
@@ -87,6 +97,16 @@ function formatCount(value: number) {
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(2)}M`
   if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`
   return String(value)
+}
+
+function featuredImage(project: SearchHit) {
+  return project.featured_gallery || project.gallery?.[0] || fallbackImage
+}
+
+function projectTint(project: SearchHit) {
+  return typeof project.color === 'number'
+    ? `#${project.color.toString(16).padStart(6, '0')}`
+    : '#1bd964'
 }
 
 function tagLabel(slug: string) {
@@ -179,7 +199,7 @@ watch([query, sort, pageSize, currentPage, () => state], scheduleLoad, { deep: t
 watch(
   () => route.path,
   () => {
-    clearAll()
+    applyDefaults(route.path)
     query.value = ''
     sort.value = 'Relevance'
     pageSize.value = 10
@@ -211,7 +231,7 @@ onUnmounted(() => {
     <p v-if="luckyError" class="creator__error category__lucky-error">{{ luckyError }}</p>
 
     <label class="category__search">
-      <Search :size="18" :stroke-width="2" aria-hidden="true" />
+      <span aria-hidden="true" v-html="searchIcon"></span>
       <input
         v-model="query"
         type="search"
@@ -228,11 +248,20 @@ onUnmounted(() => {
       <SelectMenu v-model="pageSize" :options="viewOptions" prefix="View" />
       <button
         type="button"
+        class="category__display-icon"
+        aria-label="Display modes"
+        @click="cycleDisplay"
+      >
+        <span v-if="displayMode === 'cards'" aria-hidden="true" v-html="showcaseIcon"></span>
+        <span v-else aria-hidden="true" v-html="cardsIcon"></span>
+      </button>
+      <button
+        type="button"
         class="category__filter-icon"
         aria-label="Open filters"
         @click="openFilter"
       >
-        <SlidersHorizontal :size="18" :stroke-width="2" aria-hidden="true" />
+        <span aria-hidden="true" v-html="slidersIcon"></span>
       </button>
     </div>
 
@@ -273,61 +302,139 @@ onUnmounted(() => {
     <p v-else-if="error" class="category__message">{{ error }}</p>
     <p v-else-if="projects.length === 0" class="category__empty">No projects match these filters.</p>
 
-    <Card
-      v-for="project in projects"
-      :key="project.project_id"
-      class="project-card project-card--link"
-      role="link"
-      tabindex="0"
-      @click="router.push(projectPath(project.project_type, project.slug))"
-      @keyup.enter="router.push(projectPath(project.project_type, project.slug))"
-    >
-      <div class="project-card__row">
-        <img
-          v-if="project.icon_url"
-          class="project-card__icon project-card__icon--image"
-          :src="project.icon_url"
-          alt=""
-        />
-        <span v-else class="project-card__icon">{{ project.title.charAt(0) }}</span>
-        <div class="project-card__body">
-          <h2 class="project-card__title">
-            {{ project.title }}
-            <button
-              type="button"
-              class="project-card__author"
-              @click.stop="router.push(userPath(project.author))"
-            >
-              by {{ project.author }}
-            </button>
-          </h2>
-          <p class="project-card__description">{{ project.description }}</p>
+    <template v-if="displayMode === 'cards'">
+      <Card
+        v-for="project in projects"
+        :key="project.project_id"
+        class="project-card project-card--link"
+        role="link"
+        tabindex="0"
+        @click="router.push(projectPath(project.project_type, project.slug))"
+        @keyup.enter="router.push(projectPath(project.project_type, project.slug))"
+      >
+        <div class="project-card__row">
+          <img
+            v-if="project.icon_url"
+            class="project-card__icon project-card__icon--image"
+            :src="project.icon_url"
+            alt=""
+          />
+          <span v-else class="project-card__icon">{{ project.title.charAt(0) }}</span>
+          <div class="project-card__body">
+            <h2 class="project-card__title">
+              {{ project.title }}
+              <button
+                type="button"
+                class="project-card__author"
+                @click.stop="router.push(userPath(project.author))"
+              >
+                by {{ project.author }}
+              </button>
+            </h2>
+            <p class="project-card__description">{{ project.description }}</p>
 
-          <div class="project-card__tags">
-            <span
-              v-for="tag in project.categories.slice(0, 3)"
-              :key="tag"
-              class="project-card__tag"
-            >
-              <span v-if="tagIconSvg(tag)" class="project-card__tag-icon" aria-hidden="true" v-html="tagIconSvg(tag)"></span>
-              {{ tagLabel(tag) }}
-            </span>
+            <div class="project-card__tags">
+              <span
+                v-for="tag in project.categories.slice(0, 3)"
+                :key="tag"
+                class="project-card__tag"
+              >
+                <span v-if="tagIconSvg(tag)" class="project-card__tag-icon" aria-hidden="true" v-html="tagIconSvg(tag)"></span>
+                {{ tagLabel(tag) }}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="project-card__meta">
-        <div class="project-card__stats">
-          <span>
-            <span class="project-card__stat-icon" aria-hidden="true" v-html="downloadIcon"></span>
-            {{ formatCount(project.downloads) }}
-          </span>
-          <span>
-            <span class="project-card__stat-icon" aria-hidden="true" v-html="heartIcon"></span>
-            {{ formatCount(project.follows) }}
+        <div class="project-card__meta">
+          <div class="project-card__stats">
+            <span>
+              <span class="project-card__stat-icon" aria-hidden="true" v-html="downloadIcon"></span>
+              {{ formatCount(project.downloads) }}
+            </span>
+            <span>
+              <span class="project-card__stat-icon" aria-hidden="true" v-html="heartIcon"></span>
+              {{ formatCount(project.follows) }}
+            </span>
+          </div>
+          <span class="project-card__updated">
+            <span class="project-card__stat-icon" aria-hidden="true" v-html="updatedIcon"></span>
+            {{ relativeTime(project.date_modified) }}
           </span>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </template>
+
+    <template v-else>
+      <Card
+        v-for="project in projects"
+        :key="project.project_id"
+        class="project-card project-card--showcase project-card--link"
+        role="link"
+        tabindex="0"
+        @click="router.push(projectPath(project.project_type, project.slug))"
+        @keyup.enter="router.push(projectPath(project.project_type, project.slug))"
+      >
+        <div class="project-card__showcase-image">
+          <img :src="featuredImage(project)" alt="" />
+          <span
+            class="project-card__showcase-tint"
+            :style="{ backgroundColor: projectTint(project) }"
+            aria-hidden="true"
+          ></span>
+        </div>
+
+        <div class="project-card__row">
+          <img
+            v-if="project.icon_url"
+            class="project-card__icon project-card__icon--image"
+            :src="project.icon_url"
+            alt=""
+          />
+          <span v-else class="project-card__icon">{{ project.title.charAt(0) }}</span>
+          <div class="project-card__body">
+            <h2 class="project-card__title">
+              {{ project.title }}
+              <button
+                type="button"
+                class="project-card__author"
+                @click.stop="router.push(userPath(project.author))"
+              >
+                by {{ project.author }}
+              </button>
+            </h2>
+            <p class="project-card__description">{{ project.description }}</p>
+
+            <div class="project-card__tags">
+              <span
+                v-for="tag in project.categories.slice(0, 3)"
+                :key="tag"
+                class="project-card__tag"
+              >
+                <span v-if="tagIconSvg(tag)" class="project-card__tag-icon" aria-hidden="true" v-html="tagIconSvg(tag)"></span>
+                {{ tagLabel(tag) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card__meta">
+          <div class="project-card__stats">
+            <span>
+              <span class="project-card__stat-icon" aria-hidden="true" v-html="downloadIcon"></span>
+              {{ formatCount(project.downloads) }}
+            </span>
+            <span>
+              <span class="project-card__stat-icon" aria-hidden="true" v-html="heartIcon"></span>
+              {{ formatCount(project.follows) }}
+            </span>
+          </div>
+          <span class="project-card__updated">
+            <span class="project-card__stat-icon" aria-hidden="true" v-html="updatedIcon"></span>
+            {{ relativeTime(project.date_modified) }}
+          </span>
+        </div>
+      </Card>
+    </template>
   </section>
 </template>
