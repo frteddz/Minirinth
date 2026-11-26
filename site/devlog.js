@@ -503,6 +503,15 @@ export const roadmap = [
 
 export const apks = [
   {
+    "name": "Minirynth-v0.5.7-dev.apk",
+    "version": "0.5.7-dev",
+    "variant": "",
+    "size": 20311782,
+    "date": "2026-11-26",
+    "url": "https://github.com/frteddz/Minirynth/releases/download/v0.5.7-dev/Minirynth-v0.5.7-dev.apk",
+    "tagUrl": "https://github.com/frteddz/Minirynth/releases/tag/v0.5.7-dev"
+  },
+  {
     "name": "Minirynth-v0.5.6-dev.apk",
     "version": "0.5.6-dev",
     "variant": "",
@@ -694,5 +703,5 @@ export const stats = {
     "Improved",
     "Removed"
   ],
-  "apks": 20
+  "apks": 21
 }
